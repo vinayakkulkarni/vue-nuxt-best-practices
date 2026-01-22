@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.2.0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.1.0...v1.2.0) (2026-01-22)
+
+
+### Features
+
+* add nuxt landing page with shadcn-vue ([63cffe6](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/63cffe6b99d13d06047db372a8197598823b2b09))
+
+
+### Documentation
+
+* update readme to match marketingskills format ([c434e28](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/c434e28a6c64d21bb17ee199406e4cb2a1904b88))
+
+
+### Miscellaneous
+
+* remove unnecessary shims-vue.d.ts from nuxt app ([fd3830d](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/fd3830d47a24d25dca04f34f9724159b4cef263d))
+
 ## [1.1.0](https://github.com/vinayakkulkarni/best-practices/compare/v1.0.0...v1.1.0) (2026-01-22)
 
 

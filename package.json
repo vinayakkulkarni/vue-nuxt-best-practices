@@ -1,6 +1,6 @@
 {
   "name": "vue-nuxt-best-practices",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Vue and Nuxt skills for Claude Code and AI agents. Reactivity, component performance, data fetching, SSR patterns, and full-stack best practices.",
   "author": {
     "name": "Vinayak Kulkarni",
