@@ -1,0 +1,28 @@
+{
+  "name": "nuxt-best-practices",
+  "version": "1.0.0",
+  "description": "Nuxt 3/4 performance optimization and architecture guidelines",
+  "author": "vinayakkulkarni",
+  "license": "MIT",
+  "categories": [
+    "data",
+    "imports",
+    "server",
+    "rendering",
+    "state",
+    "types",
+    "modules",
+    "perf"
+  ],
+  "tags": [
+    "nuxt",
+    "nuxt3",
+    "nuxt4",
+    "vue",
+    "ssr",
+    "performance",
+    "optimization",
+    "best-practices",
+    "full-stack"
+  ]
+}
