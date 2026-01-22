@@ -1,0 +1,25 @@
+{
+  "name": "vue-best-practices",
+  "version": "1.0.0",
+  "description": "Vue.js performance optimization guidelines for building fast, maintainable applications",
+  "author": "vinayakkulkarni",
+  "license": "MIT",
+  "categories": [
+    "reactivity",
+    "component",
+    "computed",
+    "template",
+    "composable",
+    "state",
+    "async",
+    "advanced"
+  ],
+  "tags": [
+    "vue",
+    "vue3",
+    "performance",
+    "optimization",
+    "best-practices",
+    "composition-api"
+  ]
+}
