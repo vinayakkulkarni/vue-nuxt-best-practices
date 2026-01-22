@@ -1,138 +1,158 @@
-# Vue & Nuxt Best Practices
+# Vue & Nuxt Skills for Claude Code
 
-[![Agent Skills](https://img.shields.io/badge/Agent%20Skills-Compatible-blue)](https://agentskills.io)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+A collection of AI agent skills focused on Vue.js and Nuxt best practices. Built for developers who want Claude Code (or similar AI coding assistants) to help with reactivity patterns, component performance, data fetching, SSR/SSG, and full-stack Vue/Nuxt development.
 
-Comprehensive performance optimization guides for Vue.js and Nuxt.js applications, designed for AI agents and LLMs. Built following the [Agent Skills specification](https://agentskills.io/specification).
+Built by [Vinayak Kulkarni](https://vinayakkulkarni.dev).
 
-## Overview
+**Contributions welcome!** Found a way to improve a skill or have a new one to add? [Open a PR](#contributing).
 
-This repository contains two agent skills:
+## What are Skills?
 
-| Skill | Description | Rules |
-|-------|-------------|-------|
-| **[vue-best-practices](./skills/vue-best-practices/)** | Vue 3 performance optimization, reactivity patterns, and Composition API best practices | 40+ rules |
-| **[nuxt-best-practices](./skills/nuxt-best-practices/)** | Nuxt 3/4 data fetching, auto-imports, server patterns, and full-stack best practices | 40+ rules |
+Skills are markdown files that give AI agents specialized knowledge and workflows for specific tasks. When you add these to your project, Claude Code can recognize when you're working on a Vue/Nuxt task and apply the right frameworks and best practices.
+
+## Available Skills
+
+| Skill | Description | Triggers |
+|-------|-------------|----------|
+| [vue-best-practices](skills/vue-best-practices/) | Vue.js reactivity, components, computed, watchers, Composition API | "Vue," "ref," "reactive," "computed," "v-if," "v-for" |
+| [nuxt-best-practices](skills/nuxt-best-practices/) | Nuxt data fetching, SSR, server routes, auto-imports, state | "Nuxt," "useFetch," "useAsyncData," "SSR," "useState" |
 
 ## Installation
 
-### Using npx (Recommended)
+### Option 1: CLI Install (Recommended)
+
+Use [add-skill](https://github.com/vercel-labs/add-skill) to install skills directly:
 
 ```bash
-# Install both skills
-npx add-skill vue-nuxt-best-practices
+# Install all skills
+npx add-skill vinayakkulkarni/vue-nuxt-best-practices
 
-# Or install individually
-npx add-skill vue-nuxt-best-practices/vue-best-practices
-npx add-skill vue-nuxt-best-practices/nuxt-best-practices
+# Install specific skills
+npx add-skill vinayakkulkarni/vue-nuxt-best-practices --skill vue-best-practices
+
+# List available skills
+npx add-skill vinayakkulkarni/vue-nuxt-best-practices --list
 ```
 
-### Manual Installation
+This automatically installs to your `.claude/skills/` directory.
 
-Clone this repository and reference the skills directly in your AI coding agent configuration.
+### Option 2: Clone and Copy
 
-## Skill Structure
+Clone the entire repo and copy the skills folder:
 
-Each skill follows the [Agent Skills specification](https://agentskills.io/specification):
-
-```
-skills/
-├── vue-best-practices/
-│   ├── SKILL.md          # Main skill file with frontmatter
-│   ├── AGENTS.md         # Compiled document for agents
-│   ├── metadata.json     # Skill metadata
-│   └── rules/            # Individual rule files
-│       ├── _sections.md  # Section definitions
-│       ├── _template.md  # Rule template
-│       └── *.md          # Individual rules
-│
-└── nuxt-best-practices/
-    ├── SKILL.md
-    ├── AGENTS.md
-    ├── metadata.json
-    └── rules/
-        └── *.md
+```bash
+git clone https://github.com/vinayakkulkarni/vue-nuxt-best-practices.git
+cp -r vue-nuxt-best-practices/skills/* .claude/skills/
 ```
 
-## Rule Categories
+### Option 3: Git Submodule
 
-### Vue Best Practices
+Add as a submodule for easy updates:
 
-| Priority | Category | Impact | Prefix |
-|----------|----------|--------|--------|
-| 1 | Reactivity Fundamentals | CRITICAL | `reactivity-` |
-| 2 | Component Performance | CRITICAL | `component-` |
-| 3 | Computed & Watchers | HIGH | `computed-` |
-| 4 | Template Optimization | MEDIUM-HIGH | `template-` |
-| 5 | Composition API Patterns | MEDIUM | `composable-` |
-| 6 | State Management | MEDIUM | `state-` |
-| 7 | Async & Data Fetching | LOW-MEDIUM | `async-` |
-| 8 | Advanced Patterns | LOW | `advanced-` |
+```bash
+git submodule add https://github.com/vinayakkulkarni/vue-nuxt-best-practices.git .claude/vue-nuxt-best-practices
+```
 
-### Nuxt Best Practices
+Then reference skills from `.claude/vue-nuxt-best-practices/skills/`.
 
-| Priority | Category | Impact | Prefix |
-|----------|----------|--------|--------|
-| 1 | Data Fetching | CRITICAL | `data-` |
-| 2 | Auto-Imports & Organization | CRITICAL | `imports-` |
-| 3 | Server & API Routes | HIGH | `server-` |
-| 4 | Rendering Modes | HIGH | `rendering-` |
-| 5 | State Management | MEDIUM-HIGH | `state-` |
-| 6 | Type Safety | MEDIUM | `types-` |
-| 7 | Modules & Plugins | LOW-MEDIUM | `modules-` |
-| 8 | Performance & Deployment | LOW | `perf-` |
+### Option 4: Fork and Customize
+
+1. Fork this repository
+2. Customize skills for your specific needs
+3. Clone your fork into your projects
 
 ## Usage
 
-### In Claude Code / Cursor
-
-Once installed, the skills are automatically available. Reference them when:
-
-- Writing new Vue/Nuxt components
-- Reviewing code for performance issues
-- Refactoring existing Vue/Nuxt code
-- Implementing data fetching patterns
-- Optimizing bundle size or load times
-
-### Example Prompts
+Once installed, just ask Claude Code to help with Vue/Nuxt tasks:
 
 ```
-Review this Vue component for performance issues using vue-best-practices
+"Help me optimize this Vue component for performance"
+-> Uses vue-best-practices skill
 
-Help me refactor this data fetching to follow Nuxt best practices
+"Set up data fetching with useFetch in Nuxt"
+-> Uses nuxt-best-practices skill
 
-What's the correct way to use computed properties according to Vue best practices?
+"What's the correct way to use computed properties?"
+-> Uses vue-best-practices skill
+
+"Create an SSR-safe server route with validation"
+-> Uses nuxt-best-practices skill
 ```
 
-## Development
+You can also invoke skills directly:
 
-This is a [Bun workspace](https://bun.sh/docs/install/workspaces) project.
-
-```bash
-# Install dependencies
-bun install
-
-# Build AGENTS.md for all skills
-bun run build
-
-# Validate skill structure
-bun run validate
 ```
+/vue-best-practices
+/nuxt-best-practices
+```
+
+## Skill Categories
+
+### Vue Best Practices
+
+| Category | Impact | Topics |
+|----------|--------|--------|
+| Reactivity Fundamentals | CRITICAL | ref vs reactive, destructuring, toRefs, shallowRef |
+| Component Performance | CRITICAL | v-once, v-memo, async components, KeepAlive |
+| Computed & Watchers | HIGH | caching, dependencies, deep watchers |
+| Template Optimization | MEDIUM-HIGH | v-show vs v-if, keys, v-if with v-for |
+| Composition API Patterns | MEDIUM | single responsibility, return refs |
+
+### Nuxt Best Practices
+
+| Category | Impact | Topics |
+|----------|--------|--------|
+| Data Fetching | CRITICAL | useFetch, unique keys, transform, error handling |
+| Auto-Imports & Organization | CRITICAL | barrel exports, component naming, type locations |
+| Server & API Routes | HIGH | validated input (Zod), route meta, runtime config |
+| Rendering Modes | HIGH | ClientOnly, route rules, hybrid rendering |
+| State Management | MEDIUM-HIGH | useState for SSR-safe state |
+| Type Safety | MEDIUM | no any, strict emits, import paths |
 
 ## Contributing
 
-1. Fork the repository
-2. Create a new rule file following `rules/_template.md`
-3. Add the rule to the appropriate section in `_sections.md`
-4. Run `bun run build` to regenerate `AGENTS.md`
-5. Submit a pull request
+Found a way to improve a skill? Have a new skill to suggest? PRs and issues welcome!
+
+**Ideas for contributions:**
+- Improve existing skill instructions or frameworks
+- Add new best practices or patterns
+- Fix typos or clarify confusing sections
+- Suggest new skills (open an issue first to discuss)
+- Add examples or case studies
+
+**How to contribute:**
+1. Fork the repo
+2. Edit the skill file(s)
+3. Submit a PR with a clear description of what you improved
+
+### Skill File Structure
+
+Each skill is a directory containing a `SKILL.md` file:
+
+```
+skills/
+  skill-name/
+    SKILL.md
+```
+
+The `SKILL.md` file follows this format:
+
+```markdown
+---
+name: skill-name
+description: One-line description for skill selection with trigger words
+---
+
+# Skill Name
+
+[Full instructions for the AI agent]
+```
 
 ## Related Projects
 
+- [coreyhaines31/marketingskills](https://github.com/coreyhaines31/marketingskills) - Marketing skills for Claude Code
 - [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) - React best practices
-- [supabase/agent-skills](https://github.com/supabase/agent-skills) - Postgres best practices
-- [Agent Skills Specification](https://agentskills.io/specification)
 
 ## License
 
-MIT License - see [LICENSE](./LICENSE) for details.
+MIT - Use these however you want.
