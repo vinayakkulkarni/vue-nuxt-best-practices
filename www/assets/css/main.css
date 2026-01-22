@@ -1,0 +1,60 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --color-background: oklch(100% 0 0);
+  --color-foreground: oklch(14.5% 0 0);
+  --color-card: oklch(100% 0 0);
+  --color-card-foreground: oklch(14.5% 0 0);
+  --color-popover: oklch(100% 0 0);
+  --color-popover-foreground: oklch(14.5% 0 0);
+  --color-primary: oklch(20.5% 0 0);
+  --color-primary-foreground: oklch(98.5% 0 0);
+  --color-secondary: oklch(96.5% 0 0);
+  --color-secondary-foreground: oklch(20.5% 0 0);
+  --color-muted: oklch(96.5% 0 0);
+  --color-muted-foreground: oklch(55.6% 0 0);
+  --color-accent: oklch(96.5% 0 0);
+  --color-accent-foreground: oklch(20.5% 0 0);
+  --color-destructive: oklch(57.7% 0.245 27.325);
+  --color-destructive-foreground: oklch(98.5% 0 0);
+  --color-border: oklch(91.4% 0 0);
+  --color-input: oklch(91.4% 0 0);
+  --color-ring: oklch(70.5% 0 0);
+  --radius: 0.625rem;
+}
+
+.dark {
+  --color-background: oklch(14.5% 0 0);
+  --color-foreground: oklch(98.5% 0 0);
+  --color-card: oklch(14.5% 0 0);
+  --color-card-foreground: oklch(98.5% 0 0);
+  --color-popover: oklch(14.5% 0 0);
+  --color-popover-foreground: oklch(98.5% 0 0);
+  --color-primary: oklch(98.5% 0 0);
+  --color-primary-foreground: oklch(20.5% 0 0);
+  --color-secondary: oklch(26.9% 0 0);
+  --color-secondary-foreground: oklch(98.5% 0 0);
+  --color-muted: oklch(26.9% 0 0);
+  --color-muted-foreground: oklch(70.8% 0 0);
+  --color-accent: oklch(26.9% 0 0);
+  --color-accent-foreground: oklch(98.5% 0 0);
+  --color-destructive: oklch(39.6% 0.141 25.723);
+  --color-destructive-foreground: oklch(98.5% 0 0);
+  --color-border: oklch(26.9% 0 0);
+  --color-input: oklch(26.9% 0 0);
+  --color-ring: oklch(44.2% 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+}
