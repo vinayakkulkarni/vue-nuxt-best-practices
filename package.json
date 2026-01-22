@@ -1,0 +1,39 @@
+{
+  "name": "vue-nuxt-best-practices",
+  "version": "1.0.0",
+  "description": "Official Vue and Nuxt best practices for AI agents",
+  "author": {
+    "name": "Vinayak Kulkarni",
+    "email": "inbox.vinayak@gmail.com",
+    "url": "https://vinayakkulkarni.dev"
+  },
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "skills/*"
+  ],
+  "scripts": {
+    "build": "bun run build:vue && bun run build:nuxt",
+    "build:vue": "bun run --cwd skills/vue-best-practices build",
+    "build:nuxt": "bun run --cwd skills/nuxt-best-practices build",
+    "validate": "bun run validate:vue && bun run validate:nuxt",
+    "validate:vue": "bun run --cwd skills/vue-best-practices validate",
+    "validate:nuxt": "bun run --cwd skills/nuxt-best-practices validate",
+    "prepare": "is-ci || husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
+    "husky": "^9.1.7",
+    "is-ci": "^4.1.0",
+    "lint-staged": "^16.2.7"
+  },
+  "lint-staged": {
+    "*.md": [
+      "bun run validate"
+    ]
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  }
+}
