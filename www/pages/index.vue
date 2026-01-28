@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
 const GITHUB_URL = 'https://github.com/vinayakkulkarni/vue-nuxt-best-practices'
-const INSTALL_COMMAND = 'npx add-skill vinayakkulkarni/vue-nuxt-best-practices'
+const INSTALL_COMMAND = 'npx skills add vinayakkulkarni/vue-nuxt-best-practices'
 
 const starCount = ref<number | null>(null)
 
@@ -64,7 +64,7 @@ function formatStars(count: number) {
         </p>
       </div>
 
-      <div class="flex w-full max-w-md flex-col gap-2">
+      <div class="flex w-full max-w-xl flex-col gap-2">
         <CopyCommand :command="INSTALL_COMMAND" />
         <p class="text-xs text-muted-foreground">
           Installs Vue & Nuxt skills to your Claude Code project

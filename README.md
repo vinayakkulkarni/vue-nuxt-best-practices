@@ -21,17 +21,17 @@ Skills are markdown files that give AI agents specialized knowledge and workflow
 
 ### Option 1: CLI Install (Recommended)
 
-Use [add-skill](https://github.com/vercel-labs/add-skill) to install skills directly:
+Use [skills](https://github.com/vercel-labs/skills) to install skills directly:
 
 ```bash
 # Install all skills
-npx add-skill vinayakkulkarni/vue-nuxt-best-practices
+npx skills add vinayakkulkarni/vue-nuxt-best-practices
 
 # Install specific skills
-npx add-skill vinayakkulkarni/vue-nuxt-best-practices --skill vue-best-practices
+npx skills add vinayakkulkarni/vue-nuxt-best-practices --skill vue-best-practices
 
 # List available skills
-npx add-skill vinayakkulkarni/vue-nuxt-best-practices --list
+npx skills add vinayakkulkarni/vue-nuxt-best-practices --list
 ```
 
 This automatically installs to your `.claude/skills/` directory.
