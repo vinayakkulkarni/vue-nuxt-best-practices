@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.2.0...v1.2.1) (2026-01-28)
+
+
+### Documentation
+
+* update to new skills cli syntax and widen command container ([fa75016](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/fa7501634841e2f9b115b9bcc4cd3d03563fbcc8))
+
 ## [1.2.0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.1.0...v1.2.0) (2026-01-22)
 
 
