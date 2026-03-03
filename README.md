@@ -16,6 +16,7 @@ Skills are markdown files that give AI agents specialized knowledge and workflow
 |-------|-------------|----------|
 | [vue-best-practices](skills/vue-best-practices/) | Vue.js reactivity, components, computed, watchers, Composition API | "Vue," "ref," "reactive," "computed," "v-if," "v-for" |
 | [nuxt-best-practices](skills/nuxt-best-practices/) | Nuxt data fetching, SSR, server routes, auto-imports, state | "Nuxt," "useFetch," "useAsyncData," "SSR," "useState" |
+| [nuxt-seo-best-practices](skills/nuxt-seo-best-practices/) | Nuxt SEO optimization for Cloudflare — OG images, meta tags, JSON-LD, Nitro config | "SEO," "OG image," "Open Graph," "meta tags," "JSON-LD," "Cloudflare Workers" |
 
 ## Installation
 
@@ -84,6 +85,7 @@ You can also invoke skills directly:
 ```
 /vue-best-practices
 /nuxt-best-practices
+/nuxt-seo-best-practices
 ```
 
 ## Skill Categories
@@ -108,6 +110,15 @@ You can also invoke skills directly:
 | Rendering Modes | HIGH | ClientOnly, route rules, hybrid rendering |
 | State Management | MEDIUM-HIGH | useState for SSR-safe state |
 | Type Safety | MEDIUM | no any, strict emits, import paths |
+
+### Nuxt SEO Best Practices
+
+| Category | Impact | Topics |
+|----------|--------|--------|
+| OG Image Generation | CRITICAL | @cf-wasm/og, Satori plain JS objects, no React |
+| Page SEO & Meta | HIGH | usePageSeo composable, Open Graph, Twitter Cards |
+| Structured Data | MEDIUM | JSON-LD, WebApplication schema, Rich Results |
+| Cloudflare & Nitro Config | HIGH | compatibilityDate, nodeCompat, SSR externals, WASM |
 
 ## Contributing
 
