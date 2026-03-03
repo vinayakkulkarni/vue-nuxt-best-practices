@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.2.1...v1.3.0) (2026-03-03)
+
+
+### Features
+
+* add nuxt-seo-best-practices skill (11 rules) ([86bedbc](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/86bedbcba3153006e12d7136db6309bdbac7b9f8))
+
+
+### Miscellaneous
+
+* add @commitlint/config-conventional dependency ([4ac12bf](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/4ac12bf1cc1b8e7899581b466915527dc7bc7278))
+* **deps:** bump dependencies ✨ ([f6db3c1](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/f6db3c19332d8ca3827177aea8067cacd377fbad))
+
 ## [1.2.1](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.2.0...v1.2.1) (2026-01-28)
 
 
