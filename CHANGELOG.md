@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.4.0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.3.0...v1.4.0) (2026-04-26)
+
+
+### Features
+
+* **geo:** add ai crawler and discovery rules ([591252c](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/591252c455f96e93b4fed1302a94809ae0b38e78))
+* **geo:** add build and validate scripts ([3dfe808](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/3dfe80874e8e172a6007761a3a9b81dfff33d249))
+* **geo:** add content extractability rules (the +40% levers) ([41b6358](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/41b635890219c708c5f00a052c58edd75ba0e894))
+* **geo:** add entity clarity json-ld rules ([b651fee](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/b651feee89b48a08bd2ece2ee0c6c7998b9a3c17))
+* **geo:** add page-level geo composable rules ([c5083e5](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/c5083e5ec5ac84f4a788ccc58584cd65e2b2290d))
+* **geo:** add rule template and section definitions ([47974de](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/47974de1be743e5d2cf3bacccbb0afbc4f8b3a02))
+* **geo:** scaffold nuxt-geo-best-practices skill ([5cc0e15](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/5cc0e15ebad7bcf549858362be0255611d54f7cd))
+
+
+### Documentation
+
+* list nuxt-geo-best-practices in repo readme ([cb777f4](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/cb777f4f0698317eab863eadf7aaf584203e9520))
+
+
+### Miscellaneous
+
+* bump dependencies ✨ ([f0b2ac9](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/f0b2ac99a7a306178b65f3034b45921982e364e2))
+* **geo:** register skill in bun workspace lockfile ([b0f6376](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/b0f63765edffcb86e320d2c500a4db8004a0a729))
+
 ## [1.3.0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.2.1...v1.3.0) (2026-03-03)
 
 
