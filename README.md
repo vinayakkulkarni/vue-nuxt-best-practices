@@ -17,6 +17,7 @@ Skills are markdown files that give AI agents specialized knowledge and workflow
 | [vue-best-practices](skills/vue-best-practices/) | Vue.js reactivity, components, computed, watchers, Composition API | "Vue," "ref," "reactive," "computed," "v-if," "v-for" |
 | [nuxt-best-practices](skills/nuxt-best-practices/) | Nuxt data fetching, SSR, server routes, auto-imports, state | "Nuxt," "useFetch," "useAsyncData," "SSR," "useState" |
 | [nuxt-seo-best-practices](skills/nuxt-seo-best-practices/) | Nuxt SEO optimization for Cloudflare — OG images, meta tags, JSON-LD, Nitro config | "SEO," "OG image," "Open Graph," "meta tags," "JSON-LD," "Cloudflare Workers" |
+| [nuxt-geo-best-practices](skills/nuxt-geo-best-practices/) | Nuxt Generative Engine Optimization (GEO) — get cited by ChatGPT, Perplexity, Claude, AI Overviews | "GEO," "AEO," "AI search," "llms.txt," "GPTBot," "ChatGPT citations," "Perplexity," "AI Overviews," "generative engines" |
 
 ## Installation
 
@@ -86,6 +87,7 @@ You can also invoke skills directly:
 /vue-best-practices
 /nuxt-best-practices
 /nuxt-seo-best-practices
+/nuxt-geo-best-practices
 ```
 
 ## Skill Categories
@@ -119,6 +121,17 @@ You can also invoke skills directly:
 | Page SEO & Meta | HIGH | usePageSeo composable, Open Graph, Twitter Cards |
 | Structured Data | MEDIUM | JSON-LD, WebApplication schema, Rich Results |
 | Cloudflare & Nitro Config | HIGH | compatibilityDate, nodeCompat, SSR externals, WASM |
+
+### Nuxt GEO Best Practices
+
+Get cited by ChatGPT, Perplexity, Claude, Google AI Overviews & AI Mode, Gemini. Built on the GEO arxiv paper (Aggarwal et al., KDD 2024) and 2,500+ tracked AI prompts from the Semrush AI Visibility Index.
+
+| Category | Impact | Topics |
+|----------|--------|--------|
+| Content Extractability | CRITICAL | Statistics, citations, quotations (+40% lift), self-contained chunks, no keyword stuffing |
+| AI Crawler & Discovery | CRITICAL | llms.txt, robots.txt for GPTBot/ClaudeBot/PerplexityBot/Google-Extended, SSR for crawlers, sitemap |
+| Entity Clarity | HIGH | Organization/Person/FAQPage/HowTo JSON-LD, sameAs cross-references, E-E-A-T |
+| Page-Level GEO | HIGH | usePageGeo composable, dateModified freshness signals |
 
 ## Contributing
 
