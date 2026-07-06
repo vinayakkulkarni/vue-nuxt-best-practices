@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.4.0...v1.5.0) (2026-07-06)
+
+
+### Features
+
+* **agent-ready:** add nuxt-agent-ready-best-practices skill ([fb53eed](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/fb53eed72934827f079754cd97a919b7750a6823))
+
 ## [1.4.0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.3.0...v1.4.0) (2026-04-26)
 
 
