@@ -13,12 +13,18 @@
     "skills/*"
   ],
   "scripts": {
-    "build": "bun run build:vue && bun run build:nuxt",
+    "build": "bun run build:vue && bun run build:nuxt && bun run build:seo && bun run build:geo && bun run build:agent-ready",
     "build:vue": "bun run --cwd skills/vue-best-practices build",
     "build:nuxt": "bun run --cwd skills/nuxt-best-practices build",
-    "validate": "bun run validate:vue && bun run validate:nuxt",
+    "build:seo": "bun run --cwd skills/nuxt-seo-best-practices build",
+    "build:geo": "bun run --cwd skills/nuxt-geo-best-practices build",
+    "build:agent-ready": "bun run --cwd skills/nuxt-agent-ready-best-practices build",
+    "validate": "bun run validate:vue && bun run validate:nuxt && bun run validate:seo && bun run validate:geo && bun run validate:agent-ready",
     "validate:vue": "bun run --cwd skills/vue-best-practices validate",
     "validate:nuxt": "bun run --cwd skills/nuxt-best-practices validate",
+    "validate:seo": "bun run --cwd skills/nuxt-seo-best-practices validate",
+    "validate:geo": "bun run --cwd skills/nuxt-geo-best-practices validate",
+    "validate:agent-ready": "bun run --cwd skills/nuxt-agent-ready-best-practices validate",
     "prepare": "is-ci || husky"
   },
   "devDependencies": {

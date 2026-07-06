@@ -18,6 +18,7 @@ Skills are markdown files that give AI agents specialized knowledge and workflow
 | [nuxt-best-practices](skills/nuxt-best-practices/) | Nuxt data fetching, SSR, server routes, auto-imports, state | "Nuxt," "useFetch," "useAsyncData," "SSR," "useState" |
 | [nuxt-seo-best-practices](skills/nuxt-seo-best-practices/) | Nuxt SEO optimization for Cloudflare — OG images, meta tags, JSON-LD, Nitro config | "SEO," "OG image," "Open Graph," "meta tags," "JSON-LD," "Cloudflare Workers" |
 | [nuxt-geo-best-practices](skills/nuxt-geo-best-practices/) | Nuxt Generative Engine Optimization (GEO) — get cited by ChatGPT, Perplexity, Claude, AI Overviews | "GEO," "AEO," "AI search," "llms.txt," "GPTBot," "ChatGPT citations," "Perplexity," "AI Overviews," "generative engines" |
+| [nuxt-agent-ready-best-practices](skills/nuxt-agent-ready-best-practices/) | Nuxt agent-readiness — make your site operable by autonomous agents (MCP, WebMCP, API/skill discovery, agent auth, DNS-AID) | "agent-ready," "isitagentready," "MCP," "WebMCP," "agent skills," "API catalog," "well-known discovery," "DNS-AID," "agentic commerce" |
 
 ## Installation
 
@@ -88,6 +89,7 @@ You can also invoke skills directly:
 /nuxt-best-practices
 /nuxt-seo-best-practices
 /nuxt-geo-best-practices
+/nuxt-agent-ready-best-practices
 ```
 
 ## Skill Categories
@@ -132,6 +134,18 @@ Get cited by ChatGPT, Perplexity, Claude, Google AI Overviews & AI Mode, Gemini.
 | AI Crawler & Discovery | CRITICAL | llms.txt, robots.txt for GPTBot/ClaudeBot/PerplexityBot/Google-Extended, SSR for crawlers, sitemap |
 | Entity Clarity | HIGH | Organization/Person/FAQPage/HowTo JSON-LD, sameAs cross-references, E-E-A-T |
 | Page-Level GEO | HIGH | usePageGeo composable, dateModified freshness signals |
+
+### Nuxt Agent-Ready Best Practices
+
+Make your site operable by autonomous AI agents (not just cited by them) — measured by the [isitagentready.com](https://isitagentready.com) scanner. A different axis from GEO: GEO is about being *cited*, agent-readiness is about being *operated*. Shared primitives (robots.txt, llms.txt, sitemap) come from the GEO skill; this adds the agent-operation layer. Two load-bearing traps captured: the honesty rule (never publish discovery for services that don't exist) and the Nitro/Workers `event.$fetch` self-loopback bug.
+
+| Category | Impact | Topics |
+|----------|--------|--------|
+| Discoverability | HIGH | RFC 8288 Link headers, RFC 9727 API catalog, agent-skills index (sha256 digest) |
+| Content | HIGH | Markdown content negotiation (Accept: text/markdown), in-process event.$fetch |
+| MCP & Tools | MEDIUM | WebMCP (navigator.modelContext), MCP Server Card (honesty-gated) |
+| Agent Auth | LOW | OAuth/OIDC discovery, oauth-protected-resource, auth.md (honesty-gated) |
+| DNS | MEDIUM | DNS-AID records + DNSSEC requirement |
 
 ## Contributing
 
