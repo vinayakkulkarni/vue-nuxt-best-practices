@@ -1,6 +1,6 @@
 ---
 name: nuxt-agent-ready-best-practices
-description: Nuxt agent-readiness guidelines for making a site operable by autonomous AI agents — not just cited by them. Covers the isitagentready.com standards: Markdown content negotiation, RFC 8288 Link headers, RFC 9727 API catalogs, Agent Skills discovery indexes, WebMCP browser tools, MCP Server Cards, OAuth/OIDC agent auth discovery, and DNS-AID. Triggers on tasks involving agent-ready, isitagentready, MCP, WebMCP, model context protocol, agent skills, API catalog, well-known discovery, agent auth, DNS-AID, A2A, or agentic commerce.
+description: "Nuxt agent-readiness guidelines for making a site operable by autonomous AI agents — not just cited by them. Covers the isitagentready.com standards: Markdown content negotiation, RFC 8288 Link headers, RFC 9727 API catalogs, Agent Skills discovery indexes, WebMCP browser tools, MCP Server Cards, OAuth/OIDC agent auth discovery, and DNS-AID. Triggers on tasks involving agent-ready, isitagentready, MCP, WebMCP, model context protocol, agent skills, API catalog, well-known discovery, agent auth, DNS-AID, A2A, or agentic commerce."
 license: MIT
 metadata:
   author: vinayakkulkarni
