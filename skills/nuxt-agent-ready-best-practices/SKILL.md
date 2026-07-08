@@ -4,14 +4,18 @@ description: "Nuxt agent-readiness guidelines for making a site operable by auto
 license: MIT
 metadata:
   author: vinayakkulkarni
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # Nuxt Agent-Ready Best Practices
 
 Guidelines for making a Nuxt 4 site **operable by autonomous AI agents** — measured by the [isitagentready.com](https://isitagentready.com) scanner (Cloudflare's "Is Your Site Agent-Ready?"). This is a different axis from GEO: GEO is about being *cited* in AI answers; agent-readiness is about being *operated* — an agent authenticating, discovering your API, calling your tools, and taking action.
 
-Proven on a production Nuxt 4 + Nitro `cloudflare_module` Worker: score **21 → 50+ (Level 1 → Level 4 "Agent-Integrated")**.
+Proven on production Nuxt 4 + Nitro `cloudflare_module` Workers:
+- A **marketing site** (only public POST endpoints, no auth/MCP server): **21 → 50+ (Level 1 → Level 4 "Agent-Integrated")** — the auth + MCP surfaces are honesty-gated OFF (see below).
+- A **full platform** with a real OAuth server (Better-Auth oauth-provider) + a real remote MCP server: **21 → 100/100 (Level 5 "Agent-Native"), all 14 checks green**. The auth + MCP surfaces are legitimately publishable there, which is what unlocks the last ~40 points.
+
+**The ceiling is set by what you actually run, not by effort.** A marketing site tops out around Level 4 and that is the *correct* score — do not fabricate an auth server to chase 100 (see THE HONESTY RULE). Only a site with a real authorization server and a real MCP server can honestly reach Level 5.
 
 ## GEO vs Agent-Readiness (know the difference)
 
@@ -41,6 +45,22 @@ Proven on a production Nuxt 4 + Nitro `cloudflare_module` Worker: score **21 →
 
 This mirrors the "never fake customers/logos/scale" rule: a fabricated capability that fails on first contact destroys trust. On a marketing site with only public POST endpoints, **skip** OAuth/OIDC discovery, oauth-protected-resource, auth.md, and the MCP Server Card — they belong on the app/console domain (real auth server) or require building a real MCP server. Decline these explicitly and say why.
 
+**The flip side — when you DO run the real thing, publish it fully.** If your site runs a real OAuth authorization server (e.g. Better-Auth `oauth-provider` plugin) and a real remote MCP server, the auth + MCP surfaces are no longer dishonest — they are the highest-value checks and unlock Level 5. maps.guru scored 100/100 precisely because those services exist. The honesty rule cuts both ways: don't fake it, but don't under-claim a real capability either.
+
+## THE SCANNER-BEHAVIOR RULES (what actually flips a check green)
+
+Passing the harder checks is NOT "publish the file and move on" — the isitagentready scanner inspects **content and runtime behavior**, not just presence. Three non-obvious behaviors cost real time to discover:
+
+1. **auth.md is content-scanned for "agent registration markers", not just existence.** A 200 response with a valid H1 and generic OAuth instructions still FAILS with *"auth.md exists but does not describe agent registration"*. The body must follow the [WorkOS AUTH.md](https://github.com/workos/auth.md) recipe shape — "You are an agent", "**agentic registration**", the ordered discover → register → authorize → exchange → revoke steps, and references to `register_uri`/`agent_auth`. See `auth-oauth-discovery` for the exact markers.
+
+2. **The `agent_auth` block in `/.well-known/oauth-authorization-server` must use WorkOS field names.** `register_uri` (not `registration_uri`), `skill`, `identity_types_supported` with valid values, plus one complete method (e.g. `anonymous.credential_types_supported` + `claim_uri`). Intuitive names silently fail the check.
+
+3. **WebMCP runs in a headless, no-GPU browser with an 8-second navigation timeout.** If your page ships heavy client JS that keeps the network busy (a live MapLibre/WebGL map streaming tiles), the checker never reaches `networkidle` and reports *"Could not check WebMCP: Navigation timeout"* — even though your tools ARE registered. Fix: skip the heavy widget when `navigator.webdriver === true` (bots get a static fallback; humans get the full experience). See `discovery-webmcp`.
+
+## SECURITY HARDENING (do this BEFORE you publish, not after)
+
+Publishing agent-discovery surfaces widens your attack surface: you're advertising a public API key to every page + browser agent, echoing request data into markdown, and adding new well-known routes. Run a security pass on the new surfaces — see the `security-hardening` rule. The load-bearing items: the page-embedded system API key MUST be origin-restricted and owned by a non-privileged account (an admin-owned key bypasses quota on every worker); WebMCP tool errors must never echo the key; `htmlToMarkdown` must not decode `<>"'` entities (indirect XSS); and the `Link` header must be skipped on `/api/**` responses.
+
 ## THE NITRO/WORKERS GOTCHA (self-referential renders)
 
 Several checks require "render my own page, then transform it" (llms-full.txt aggregation, markdown negotiation). On a deployed Cloudflare Worker, an **absolute-URL** `$fetch('https://<origin>/path')` becomes a real edge subrequest that returns **empty** on the same-zone self-loopback — but it works on `wrangler dev` (single local server), so the bug is invisible until production.
@@ -58,7 +78,8 @@ Always use **relative in-process** `event.$fetch(path, { headers })` — Nitro's
 
 - **discovery** — Link headers, API catalog, agent-skills index, markdown negotiation, WebMCP, MCP server card, DNS-AID
 - **content** — markdown content negotiation
-- **auth** — OAuth/OIDC + protected-resource + auth.md (honesty-gated)
+- **auth** — OAuth/OIDC + protected-resource + auth.md content-markers + `agent_auth` block (honesty-gated)
 - **dns** — DNS-AID records + DNSSEC
+- **security** — hardening the new agent surfaces (origin-restricted public key, error sanitization, entity encoding, Link-skip on `/api`)
 
 Commerce checks (x402, MPP, UCP, ACP) are informational-only on non-commerce sites and do NOT affect the score — skip them unless the site actually sells to agents.

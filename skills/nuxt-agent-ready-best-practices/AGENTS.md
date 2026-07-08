@@ -7,7 +7,11 @@
 
 Guidelines for making a Nuxt 4 site **operable by autonomous AI agents** — measured by the [isitagentready.com](https://isitagentready.com) scanner (Cloudflare's "Is Your Site Agent-Ready?"). This is a different axis from GEO: GEO is about being *cited* in AI answers; agent-readiness is about being *operated* — an agent authenticating, discovering your API, calling your tools, and taking action.
 
-Proven on a production Nuxt 4 + Nitro `cloudflare_module` Worker: score **21 → 50+ (Level 1 → Level 4 "Agent-Integrated")**.
+Proven on production Nuxt 4 + Nitro `cloudflare_module` Workers:
+- A **marketing site** (only public POST endpoints, no auth/MCP server): **21 → 50+ (Level 1 → Level 4 "Agent-Integrated")** — the auth + MCP surfaces are honesty-gated OFF (see below).
+- A **full platform** with a real OAuth server (Better-Auth oauth-provider) + a real remote MCP server: **21 → 100/100 (Level 5 "Agent-Native"), all 14 checks green**. The auth + MCP surfaces are legitimately publishable there, which is what unlocks the last ~40 points.
+
+**The ceiling is set by what you actually run, not by effort.** A marketing site tops out around Level 4 and that is the *correct* score — do not fabricate an auth server to chase 100 (see THE HONESTY RULE). Only a site with a real authorization server and a real MCP server can honestly reach Level 5.
 
 ## GEO vs Agent-Readiness (know the difference)
 
@@ -37,6 +41,22 @@ Proven on a production Nuxt 4 + Nitro `cloudflare_module` Worker: score **21 →
 
 This mirrors the "never fake customers/logos/scale" rule: a fabricated capability that fails on first contact destroys trust. On a marketing site with only public POST endpoints, **skip** OAuth/OIDC discovery, oauth-protected-resource, auth.md, and the MCP Server Card — they belong on the app/console domain (real auth server) or require building a real MCP server. Decline these explicitly and say why.
 
+**The flip side — when you DO run the real thing, publish it fully.** If your site runs a real OAuth authorization server (e.g. Better-Auth `oauth-provider` plugin) and a real remote MCP server, the auth + MCP surfaces are no longer dishonest — they are the highest-value checks and unlock Level 5. maps.guru scored 100/100 precisely because those services exist. The honesty rule cuts both ways: don't fake it, but don't under-claim a real capability either.
+
+## THE SCANNER-BEHAVIOR RULES (what actually flips a check green)
+
+Passing the harder checks is NOT "publish the file and move on" — the isitagentready scanner inspects **content and runtime behavior**, not just presence. Three non-obvious behaviors cost real time to discover:
+
+1. **auth.md is content-scanned for "agent registration markers", not just existence.** A 200 response with a valid H1 and generic OAuth instructions still FAILS with *"auth.md exists but does not describe agent registration"*. The body must follow the [WorkOS AUTH.md](https://github.com/workos/auth.md) recipe shape — "You are an agent", "**agentic registration**", the ordered discover → register → authorize → exchange → revoke steps, and references to `register_uri`/`agent_auth`. See `auth-oauth-discovery` for the exact markers.
+
+2. **The `agent_auth` block in `/.well-known/oauth-authorization-server` must use WorkOS field names.** `register_uri` (not `registration_uri`), `skill`, `identity_types_supported` with valid values, plus one complete method (e.g. `anonymous.credential_types_supported` + `claim_uri`). Intuitive names silently fail the check.
+
+3. **WebMCP runs in a headless, no-GPU browser with an 8-second navigation timeout.** If your page ships heavy client JS that keeps the network busy (a live MapLibre/WebGL map streaming tiles), the checker never reaches `networkidle` and reports *"Could not check WebMCP: Navigation timeout"* — even though your tools ARE registered. Fix: skip the heavy widget when `navigator.webdriver === true` (bots get a static fallback; humans get the full experience). See `discovery-webmcp`.
+
+## SECURITY HARDENING (do this BEFORE you publish, not after)
+
+Publishing agent-discovery surfaces widens your attack surface: you're advertising a public API key to every page + browser agent, echoing request data into markdown, and adding new well-known routes. Run a security pass on the new surfaces — see the `security-hardening` rule. The load-bearing items: the page-embedded system API key MUST be origin-restricted and owned by a non-privileged account (an admin-owned key bypasses quota on every worker); WebMCP tool errors must never echo the key; `htmlToMarkdown` must not decode `<>"'` entities (indirect XSS); and the `Link` header must be skipped on `/api/**` responses.
+
 ## THE NITRO/WORKERS GOTCHA (self-referential renders)
 
 Several checks require "render my own page, then transform it" (llms-full.txt aggregation, markdown negotiation). On a deployed Cloudflare Worker, an **absolute-URL** `$fetch('https://<origin>/path')` becomes a real edge subrequest that returns **empty** on the same-zone self-loopback — but it works on `wrangler dev` (single local server), so the bug is invisible until production.
@@ -54,8 +74,9 @@ Always use **relative in-process** `event.$fetch(path, { headers })` — Nitro's
 
 - **discovery** — Link headers, API catalog, agent-skills index, markdown negotiation, WebMCP, MCP server card, DNS-AID
 - **content** — markdown content negotiation
-- **auth** — OAuth/OIDC + protected-resource + auth.md (honesty-gated)
+- **auth** — OAuth/OIDC + protected-resource + auth.md content-markers + `agent_auth` block (honesty-gated)
 - **dns** — DNS-AID records + DNSSEC
+- **security** — hardening the new agent surfaces (origin-restricted public key, error sanitization, entity encoding, Link-skip on `/api`)
 
 Commerce checks (x402, MPP, UCP, ACP) are informational-only on non-commerce sites and do NOT affect the score — skip them unless the site actually sells to agents.
 
@@ -104,15 +125,71 @@ export default defineEventHandler((event: H3Event) => {
 
 Map every field to an endpoint your auth stack actually serves. With Better Auth, point these at its real mounted routes — do not invent paths.
 
+### The `agent_auth` block MUST use WorkOS field names (or the check fails)
+
+The `Auth.md agent registration` check reads an `agent_auth` object inside `/.well-known/oauth-authorization-server` and validates it against the [WorkOS AUTH.md](https://github.com/workos/auth.md) profile. **The intuitive field names silently fail.** It wants `register_uri` (NOT `registration_uri`), `skill` (the URL of your auth.md), `identity_types_supported` with a valid value, and at least one complete registration method. For a service that registers agents anonymously via Dynamic Client Registration (RFC 7591) — the common Better-Auth `oauth-provider` shape — use the `anonymous` method:
+
+```ts
+// inside the /.well-known/oauth-authorization-server response body
+agent_auth: {
+  skill: `${ISSUER}/auth.md`,                       // URL of your auth.md
+  register_uri: `${ISSUER}/api/v1/auth/oauth2/register`, // real DCR endpoint
+  identity_types_supported: ['anonymous'],
+  anonymous: {
+    credential_types_supported: ['oauth2-authz-code-pkce', 'api-key'],
+    claim_uri: `${ISSUER}/dashboard/tokens`,        // where a human claims/manages
+  },
+},
+```
+
+Add the top-level RFC 8414 fields too (`issuer`, `token_endpoint`, `revocation_endpoint`, `grant_types_supported`) — the checker restates them. Every value must map to a real endpoint.
+
+### auth.md is CONTENT-scanned for "agent registration markers"
+
+Serving `/auth.md` with a 200 and a valid H1 is **not enough**. The checker greps the markdown body for agent-registration markers and fails with *"auth.md exists but does not describe agent registration"* if they're absent — generic "here's how to OAuth" prose does not pass. Write it in the [WorkOS AUTH.md](https://github.com/workos/auth.md) recipe shape:
+
+```md
+# Auth.md — Agent Registration for <site>
+
+You are an agent. This service supports **agentic registration**: discover →
+register → authorize → exchange for an access token → call the API → handle
+revocation. Follow the steps in order.
+
+## Step 1 — Discover
+Fetch `/.well-known/oauth-protected-resource` (PRM, RFC 9728) and
+`/.well-known/oauth-authorization-server` (RFC 8414). The `agent_auth` block
+carries this skill (`skill`), the registration endpoint (`register_uri`), and
+`identity_types_supported`.
+
+## Step 2 — Register
+Dynamic Client Registration (RFC 7591): POST client metadata to `register_uri`.
+
+## Step 3 — Authorize   ## Step 4 — Exchange   ## Step 5 — Use the access token
+Standard OAuth 2.1 + PKCE; exchange the code at the token_endpoint; call with
+`Authorization: Bearer <token>`.
+
+## Revocation
+Tokens revocable at the `revocation_endpoint` (RFC 7009).
+```
+
+Required marker phrases the scanner looks for: `agentic registration`, `You are an agent`, ordered `register`/`authorize`/`exchange`/`revocation` steps, and `register_uri`/`agent_auth` references. Pin them in a unit test so a future edit can't silently drop a marker and re-break the check.
+
 ### Verify
 
 ```bash
-curl -s https://app.your-site.com/.well-known/openid-configuration | jq '.issuer, .token_endpoint'
-# then confirm the token_endpoint actually responds (not 404)
-curl -s -o /dev/null -w '%{http_code}\n' https://app.your-site.com/api/v1/auth/token
+# 1. agent_auth block present with WorkOS field names
+curl -s https://app.your-site.com/.well-known/oauth-authorization-server \
+  | jq '.agent_auth | {skill, register_uri, identity_types_supported}'
+
+# 2. auth.md carries the registration markers (expect a non-zero count)
+curl -s https://app.your-site.com/auth.md \
+  | grep -c 'agentic registration\|register_uri\|agent_auth'
+
+# 3. every advertised endpoint actually responds (not 404)
+curl -s -o /dev/null -w '%{http_code}\n' https://app.your-site.com/api/v1/auth/oauth2/register
 ```
 
-Reference: [OIDC Discovery](http://openid.net/specs/openid-connect-discovery-1_0.html) · [RFC 8414](https://www.rfc-editor.org/rfc/rfc8414) · [RFC 9728](https://www.rfc-editor.org/rfc/rfc9728) · [auth.md](https://github.com/workos/auth.md)
+Reference: [OIDC Discovery](http://openid.net/specs/openid-connect-discovery-1_0.html) · [RFC 8414](https://www.rfc-editor.org/rfc/rfc8414) · [RFC 9728](https://www.rfc-editor.org/rfc/rfc9728) · [WorkOS auth.md](https://github.com/workos/auth.md)
 
 ---
 
@@ -457,6 +534,30 @@ export default defineNuxtPlugin(() => {
 });
 ```
 
+### The headless-browser networkidle trap (the #1 false failure)
+
+The scanner checks WebMCP by loading your page in a **headless, no-GPU browser with an 8-second navigation timeout**, waiting for `networkidle`, then inspecting `navigator.modelContext`. If your page ships heavy client JS that keeps the network busy past 8s — most commonly a **live MapLibre/WebGL map streaming vector tiles**, or any long-running animation that fetches — the checker times out with *"Could not check WebMCP: Navigation timeout of 8000 ms exceeded"* **even though your tools registered correctly**. The failure is about page load, not about WebMCP.
+
+Fix: detect automation and skip the heavy widget. Bots get a lightweight static fallback so the page reaches `networkidle` fast; humans get the full experience. The WebMCP tools register regardless (they're cheap and map-independent).
+
+```vue
+<!-- app/components/HeroMap.client.vue -->
+<script setup lang="ts">
+  // Headless checkers have no GPU; MapLibre tile streaming starves their
+  // networkidle wait and the WebMCP check times out. Bots get the gradient only.
+  const isAutomated = navigator.webdriver === true;
+</script>
+
+<template>
+  <div class="hero">
+    <!-- Live map only for real users; static fallback (CSS gradient) for bots -->
+    <VMap v-if="!isAutomated" :options="mapOptions" />
+  </div>
+</template>
+```
+
+Delaying the heavy work (e.g. starting a map animation 15s after idle) is NOT enough — the *initial* tile load alone can exceed the 8s window. Gating on `navigator.webdriver` is the reliable fix. Verify both paths (see below): the bot path must reach `networkidle` in a few seconds AND still expose the tools.
+
 ### Verify in a real browser (Playwright)
 
 The scanner loads the page in a browser, so verify the same way — inject a fake `navigator.modelContext` before load and assert the tool registered:
@@ -472,6 +573,20 @@ await page.addInitScript(() => {
 });
 await page.goto('https://your-site.com/');
 console.log(await page.evaluate(() => window.__mcp)); // ['run_free_audit']
+```
+
+Also verify the **bot path** reaches networkidle fast while still exposing tools — force `navigator.webdriver` true and confirm the heavy widget is skipped:
+
+```js
+await page.addInitScript(() => {
+  Object.defineProperty(navigator, 'webdriver', { get: () => true });
+});
+const t0 = Date.now();
+await page.goto('https://your-site.com/', { waitUntil: 'networkidle', timeout: 15000 });
+console.log('bot networkidle in', Date.now() - t0, 'ms'); // want < 8000
+console.log(await page.evaluate(() => document.querySelectorAll('canvas').length)); // 0 (map skipped)
+console.log(await page.evaluate(async () =>
+  (await navigator.modelContext.getTools()).map((t) => t.name))); // tools still present
 ```
 
 Reference: [WebMCP spec](https://webmachinelearning.github.io/webmcp/) · [Chrome WebMCP EPP](https://developer.chrome.com/blog/webmcp-epp)
@@ -522,3 +637,86 @@ curl -s 'https://cloudflare-dns.com/dns-query?name=your-site.com&type=A&do=1' \
 ```
 
 Reference: [DNS-AID draft](https://datatracker.ietf.org/doc/draft-mozleywilliams-dnsop-dnsaid/) · [RFC 9460 (SVCB/HTTPS records)](https://www.rfc-editor.org/rfc/rfc9460)
+
+---
+
+### Harden the Agent-Discovery Surfaces Before Publishing
+
+**Impact:** HIGH - Agent-readiness widens your attack surface — a page-embedded API key, request data echoed into markdown, and new well-known routes each need a security pass before they ship
+
+## Harden the Agent-Discovery Surfaces Before Publishing
+
+Making a site agent-operable means advertising a public API key to every page and browser agent, echoing request data into generated markdown, and adding new well-known routes. Each is a new attack surface. Run a security pass on the agent surfaces **before** you publish them — the checks below are the ones a read-only security review (e.g. Oracle) reliably flags on a first agent-ready pass.
+
+### 1. The page-embedded system API key must be origin-restricted AND non-privileged
+
+To render a live basemap (or any authed widget) on public pages, you embed a `NUXT_PUBLIC_*` API key in the client bundle — it's in page source and now handed to browser agents via WebMCP. Two invariants:
+
+- **Origin-restrict it.** A key with empty `allowedOrigins` works from any site and any server-side caller. Lock it to your own origins (`https://your-site.com`, `https://www.your-site.com`).
+- **Own it with a non-privileged account.** If the key's owner has an `admin`/superadmin role, your workers likely **skip quota enforcement** for admin-owned keys — so a scraper who lifts the key from page source gets *unlimited, untracked* calls to expensive endpoints (tiles, geocoding, browser-render). Mint a dedicated, scope-minimal, non-admin key for the public embed.
+
+```ts
+// ❌ WRONG — admin-owned, no origin restriction, baked into every page
+NUXT_PUBLIC_SYSTEM_API_KEY = adminOwnedKeyWithEmptyAllowedOrigins;
+
+// ✅ RIGHT — non-admin owner, scopes = only what the public widget needs,
+//    allowedOrigins locked to your domains
+NUXT_PUBLIC_SYSTEM_API_KEY = restrictedKey; // owner role: member; origins: [https://your-site.com]
+```
+
+Remember `NUXT_PUBLIC_*` is baked at **build** time. On a local-wrangler deploy it comes from local `.env`; also update the CI secret so a restored pipeline doesn't re-bake the old key.
+
+### 2. Never echo the key in WebMCP tool errors
+
+A WebMCP `execute` callback that does `throw new Error(\`fetch failed: \${err}\`)` can leak the request URL — including `?key=...` — into an error surfaced to the agent/user. Sanitize:
+
+```ts
+execute: async (input) => {
+  try {
+    return await $fetch('/api/v1/geocoding/search', { query: { text: input.q } });
+  } catch {
+    // Do NOT interpolate the caught error — it can contain the key-bearing URL.
+    throw new Error('Geocoding request failed.');
+  }
+};
+```
+
+### 3. `htmlToMarkdown` must not decode `<>"'` entities (indirect XSS)
+
+The markdown-negotiation transformer converts HTML to markdown. If it decodes `&lt;`/`&gt;`/`&quot;`/`&#39;` back to raw `<>"'`, an attacker-controlled string that was safely escaped in your HTML becomes live markup in the markdown an agent renders. Decode only the safe named entities (`&amp;`, `&nbsp;`) and **leave the angle-bracket/quote entities encoded**.
+
+```ts
+// ✅ Keep <>"' encoded; a downstream markdown renderer won't execute them.
+md = md.replace(/&amp;/g, '&').replace(/&nbsp;/g, ' ');
+// do NOT add: .replace(/&lt;/g,'<').replace(/&gt;/g,'>')...
+```
+
+### 4. Skip the `Link` header on `/api/**` responses
+
+The RFC 8288 `Link` header advertising llms.txt/sitemap/api-catalog belongs on **HTML** responses, not on JSON API responses. Emitting it on `/api/**` is noise at best and leaks your discovery topology onto every data response. Guard the middleware:
+
+```ts
+export default defineEventHandler((event) => {
+  const path = getRequestURL(event).pathname;
+  if (path.startsWith('/api/')) return; // API responses don't advertise discovery
+  appendHeader(event, 'Link', LINK_HEADER);
+});
+```
+
+### 5. Cache-Control + nosniff on the discovery JSON routes
+
+The `/.well-known/*` metadata documents are public and static-ish. Set `X-Content-Type-Options: nosniff` (so a browser can't be tricked into re-typing `application/json` as HTML) and a sane `Cache-Control` (CDN-cacheable, short-ish) on each. Also gate any debug header (e.g. an `x-markdown-tokens` count) behind a non-production check so it doesn't ship to prod.
+
+### Verify
+
+```bash
+# key is origin-restricted (fails cross-origin) and non-admin — check via your key store
+# Link header present on HTML, absent on /api
+curl -sI https://your-site.com/            | grep -ic '^link:'   # 1
+curl -sI https://your-site.com/api/v1/ping | grep -ic '^link:'   # 0
+# nosniff on discovery docs
+curl -sI https://your-site.com/.well-known/oauth-authorization-server \
+  | grep -i 'x-content-type-options'                              # nosniff
+```
+
+Reference: [RFC 8288 (Web Linking)](https://www.rfc-editor.org/rfc/rfc8288) · [OWASP: Reflected XSS](https://owasp.org/www-community/attacks/xss/) · run a read-only security review (Oracle) over the new surfaces before shipping

@@ -1,10 +1,10 @@
 {
   "name": "nuxt-agent-ready-best-practices",
-  "version": "1.0.0",
-  "description": "Nuxt agent-readiness guidelines for making a site operable by autonomous AI agents (MCP, WebMCP, API/skill discovery, agent auth, DNS-AID, agentic commerce)",
+  "version": "1.1.0",
+  "description": "Nuxt agent-readiness guidelines for making a site operable by autonomous AI agents (MCP, WebMCP, API/skill discovery, agent auth, DNS-AID, agentic commerce). Proven 21 to 100/100 (Level 5 Agent-Native) on a full platform with real OAuth + MCP servers.",
   "author": "vinayakkulkarni",
   "license": "MIT",
-  "categories": ["discovery", "content", "auth", "mcp", "dns"],
+  "categories": ["discovery", "content", "auth", "mcp", "dns", "security"],
   "tags": [
     "nuxt",
     "nuxt4",
@@ -21,9 +21,13 @@
     "link-headers",
     "markdown-negotiation",
     "oauth-discovery",
+    "auth-md",
+    "agent-auth",
+    "workos",
     "dns-aid",
     "agentic-commerce",
     "well-known",
+    "security-hardening",
     "cloudflare-workers",
     "nitro",
     "best-practices"
