@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.5.1...v1.6.0) (2026-07-08)
+
+
+### Features
+
+* **nuxt-agent-ready:** capture 100/100 level 5 learnings ([1c2f387](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/1c2f3878aa062c1243de595c5e91819e6f9a00a2))
+
 ## [1.5.1](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.5.0...v1.5.1) (2026-07-08)
 
 
