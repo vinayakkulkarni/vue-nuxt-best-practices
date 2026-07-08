@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.1](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.5.0...v1.5.1) (2026-07-08)
+
+
+### Bug Fixes
+
+* **agent-ready:** quote skill description frontmatter ([c0d49e0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/c0d49e05abf3e0fccba97fa114f57375a8817c0c))
+
+
+### Miscellaneous
+
+* ignore .omo dir ([f11f221](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/f11f22178884514af5caaa70edaabc1dfff5c7e5))
+
 ## [1.5.0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.4.0...v1.5.0) (2026-07-06)
 
 
