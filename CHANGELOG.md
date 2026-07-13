@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.6.1](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.6.0...v1.6.1) (2026-07-13)
+
+
+### Bug Fixes
+
+* bug in defineRouteMeta ([bebf3a4](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/bebf3a40dc104836fe1a9193247dd983a9f5c05f))
+
+
+### Miscellaneous
+
+* bump deps ✨ ([d5a0c26](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/d5a0c26a414b13e95b5ffac0c9a26b884ccff865))
+
 ## [1.6.0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.5.1...v1.6.0) (2026-07-08)
 
 
