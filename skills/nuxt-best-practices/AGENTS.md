@@ -88,7 +88,7 @@ Reference these guidelines when:
 - `types-import-paths` - Use correct import paths (#shared, ~/, ~~/)
 - `types-no-any` - Never use `any` type
 - `types-zod-schemas` - Use Zod for runtime validation with type inference
-- `types-strict-emits` - Use kebab-case emits with full type definitions
+- `types-strict-emits` - Type emits fully; declare camelCase, listen kebab-case
 
 ### 8. Modules & Plugins (LOW-MEDIUM)
 
@@ -206,7 +206,7 @@ enabled: () => cond; // getter
 | Behavior               | What happens                                                        |
 | ---------------------- | ------------------------------------------------------------------- |
 | `enabled` is `false`   | Initial fetch, `execute()`, `refresh()`, and watch triggers blocked |
-| Flips `true` → `false` | In-flight request cancelled, status returns to `idle`               |
+| Flips `true` → `false` | In-flight request cancelled; existing `data` retained               |
 | Data on disable        | **Kept** — not cleared (call `clear()` yourself if needed)          |
 | Flips `false` → `true` | Does NOT auto-refetch — a trigger (watch/execute) must fire         |
 
@@ -299,6 +299,8 @@ Data fetching can fail or take time. Always handle `error` and `status`/`pending
 | `success` | Request completed successfully |
 | `error`   | Request failed                 |
 
+`pending` is still a supported boolean ref (equal to `status === 'pending'`) — not deprecated — but prefer `status` for the full lifecycle.
+
 **Using NuxtErrorBoundary for global error handling:**
 
 ```vue
@@ -362,7 +364,7 @@ export function useFetchWithNotification<T>(
 }
 ```
 
-Reference: [Nuxt Error Handling](https://nuxt.com/docs/getting-started/error-handling)
+Reference: [Nuxt Error Handling](https://nuxt.com/docs/getting-started/error-handling) | [useFetch](https://nuxt.com/docs/api/composables/use-fetch)
 
 ---
 
@@ -504,6 +506,8 @@ Reference: [Nuxt Data Fetching - Keys](https://nuxt.com/docs/getting-started/dat
 ## Transform Data at Fetch Time, Not in Template
 
 Transform and filter data in useFetch options rather than in templates or computed properties. This reduces the payload sent to the client and avoids repeated transformations.
+
+`transform`/`pick` shrink the client payload only — the full response is still fetched on the server. To reduce what's fetched, change the API itself.
 
 **Incorrect (transform in template/computed):**
 
@@ -808,6 +812,8 @@ components/
 | `ui/form/Input.vue`         | `<UiFormInput />`         | Nested folders |
 | `dashboard/cards/Stats.vue` | `<DashboardCardsStats />` | Deep nesting   |
 
+**Note:** Nuxt automatically removes a filename segment that exactly matches its folder (`tokens/Tokens.vue` → `<Tokens>`), but does NOT dedupe partial overlaps like `Tokens` vs `Token` — hence `tokens/TokenCard.vue` → `<TokensTokenCard>`.
+
 **For shared/global components:**
 
 ```
@@ -822,18 +828,18 @@ components/
 ```typescript
 // nuxt.config.ts
 export default defineNuxtConfig({
-  components: {
-    dirs: [
-      {
-        path: '~/components/ui',
-        prefix: '', // No prefix for UI components
-      },
-    ],
-  },
+  components: [
+    {
+      path: '~/components/ui',
+      pathPrefix: false, // No folder-derived prefix for UI components
+    },
+  ],
 });
 ```
 
-Reference: [Nuxt Components Directory](https://nuxt.com/docs/guide/directory-structure/components)
+`pathPrefix: false` removes the folder-derived prefix; `prefix: 'X'` adds one.
+
+Reference: [Nuxt Components Directory](https://nuxt.com/docs/guide/directory-structure/app/components)
 
 ---
 
@@ -843,7 +849,7 @@ Reference: [Nuxt Components Directory](https://nuxt.com/docs/guide/directory-str
 
 ## Composables Export Functions Only, Not Types
 
-Composable files should ONLY export functions. Import types from dedicated type files.
+Composable files should ONLY export functions. Import types from dedicated type files. This is a project convention — Nuxt does not enforce it — but keeping composables function-only keeps the architecture clean.
 
 **Incorrect (exporting types from composables):**
 
@@ -950,6 +956,8 @@ export function useAuth(): UseAuthReturn {
 | Types/Interfaces        | ❌  | Move to types directory         |
 | Classes                 | ❌  | Move to utils or services       |
 
+**Note:** `shared/types/` is an auto-import location — top-level files there are scanned automatically (v3.14+), so explicit `#shared/types/...` imports are optional for top-level files and required for nested ones.
+
 Reference: [Nuxt Composables](https://nuxt.com/docs/guide/directory-structure/composables)
 
 ---
@@ -960,9 +968,11 @@ Reference: [Nuxt Composables](https://nuxt.com/docs/guide/directory-structure/co
 
 ## Use Direct Imports Between Composables
 
-When a composable calls another composable, use direct relative imports, NOT Nuxt's auto-import. This prevents circular dependency warnings.
+In a flat top-level `composables/` layout, calling one composable from another via auto-import is officially supported and fine — Nuxt endorses it ("You can use a composable within another composable using auto imports").
 
-**Incorrect (auto-import between composables):**
+This direct-import rule applies specifically WHEN you use a root `composables/index.ts` barrel to expose composables from nested subdirectories. In that setup, composable → composable calls must use direct relative imports to avoid a dependency cycle routed through the barrel.
+
+**Incorrect (auto-import routed through the root barrel):**
 
 ```typescript
 // ❌ WRONG - app/composables/dashboard/use-dashboard.ts
@@ -1012,7 +1022,7 @@ export function useDashboard() {
 The root `composables/index.ts` barrel file re-exports all composables:
 
 ```typescript
-// composables/index.ts (required for Nuxt auto-import)
+// composables/index.ts (required only to auto-import composables in nested subdirectories)
 export { useAuth } from './auth/use-auth';
 export { useTokens } from './tokens/use-tokens';
 export { useDashboard } from './dashboard/use-dashboard';
@@ -1037,9 +1047,10 @@ import { useToast } from '../toast/use-toast';
 const { user } = useAuth(); // Auto-imported
 const { tokens } = useTokens(); // Auto-imported
 
-// ✅ In server code - import explicitly
+// ✅ In server code - server/utils/ is auto-imported recursively,
+// so helpers are already available without an explicit import
 // server/api/data.ts
-import { someUtil } from '~~/server/utils/helpers';
+const result = someUtil(); // Auto-imported from server/utils/
 ```
 
 **Common composable imports to add:**
@@ -1055,11 +1066,12 @@ import { useToast } from '../toast/use-toast';
 
 **Rule summary:**
 
-| Location                | Import Method     | Example                               |
-| ----------------------- | ----------------- | ------------------------------------- |
-| Composable → Composable | Direct relative   | `import { useAuth } from '../auth'`   |
-| Component → Composable  | Auto-import       | `const { user } = useAuth()`          |
-| Server → Server util    | Direct with alias | `import { x } from '~~/server/utils'` |
+| Location                                  | Import Method   | Example                             |
+| ----------------------------------------- | --------------- | ----------------------------------- |
+| Composable → Composable (via root barrel) | Direct relative | `import { useAuth } from '../auth'` |
+| Composable → Composable (flat top-level)  | Auto-import     | `const { user } = useAuth()`        |
+| Component → Composable                    | Auto-import     | `const { user } = useAuth()`        |
+| Server → Server util                      | Auto-import     | `const x = someUtil()`              |
 
 Reference: [Nuxt Auto-imports](https://nuxt.com/docs/guide/concepts/auto-imports)
 
@@ -1125,7 +1137,9 @@ export function useAuth() {
 
 ```typescript
 // ❌ WRONG - composables/auth/index.ts
-// This creates circular dependencies and duplicates
+// The problem arises specifically from double re-export: this feature
+// barrel is then re-exported by the root composables/index.ts, creating
+// a cycle and duplicate imports — not from the feature barrel existing alone.
 export * from './use-auth';
 export * from './use-session';
 
@@ -1134,13 +1148,13 @@ export * from './use-session';
 
 **Summary:**
 
-| Location                    | Barrel Export? | Reason                           |
-| --------------------------- | -------------- | -------------------------------- |
-| `composables/index.ts`      | ✅ Yes         | Enables nested auto-imports      |
-| `composables/auth/index.ts` | ❌ No          | Causes duplicates/circular deps  |
-| `server/utils/**`           | ❌ No          | Recursive scan - duplicates      |
-| `utils/index.ts`            | ✅ Yes         | Enables nested auto-imports      |
-| `shared/types/index.ts`     | ✅ Yes         | Organization (not auto-imported) |
+| Location                    | Barrel Export? | Reason                                                                                                  |
+| --------------------------- | -------------- | ------------------------------------------------------------------------------------------------------- |
+| `composables/index.ts`      | ✅ Yes         | Enables nested auto-imports                                                                             |
+| `composables/auth/index.ts` | ❌ No          | Causes duplicates/circular deps                                                                         |
+| `server/utils/**`           | ❌ No          | Recursive scan - duplicates                                                                             |
+| `utils/index.ts`            | ✅ Yes         | Enables nested auto-imports                                                                             |
+| `shared/types/index.ts`     | ✅ Yes         | top-level files in `shared/types/` ARE auto-imported (v3.14+); nested subdirs are not unless configured |
 
 Reference: [Nuxt Auto-imports](https://nuxt.com/docs/guide/concepts/auto-imports) | [Composables Directory](https://nuxt.com/docs/guide/directory-structure/composables)
 
@@ -1195,7 +1209,7 @@ project/
 │       ├── auth.ts               # OAuthProviderUIConfig, LoginFormState
 │       ├── billing.ts            # TierInfo, ButtonConfig
 │       └── navigation.ts         # SidebarState, NavItem
-├── shared/
+├── shared/                       # available since Nuxt 3.14+
 │   └── types/                    # Shared between client & server
 │       ├── auth.ts               # User, Session, OAuthProviderId
 │       ├── token.ts              # ApiToken, TokenMetadata
@@ -1229,6 +1243,8 @@ import type { InternalConfig } from '~~/server/types/internal';
 | API request/response | `shared/types/` | `#shared/types/...`   | User, ApiToken, responses           |
 | Database entities    | `shared/types/` | `#shared/types/...`   | DB models used by both              |
 | Server internals     | `server/types/` | `~~/server/types/...` | Middleware context, internal config |
+
+**Note:** `shared/types/` top-level files are auto-imported (v3.14+); `app/types/` and `server/types/` are plain import targets (no auto-import).
 
 **Why this matters:**
 
@@ -1305,7 +1321,7 @@ Reference: [Pages — Named Views](https://nuxt.com/docs/guide/directory-structu
 
 ## Wire Prefetch Manually in NuxtLink Custom Slots (Nuxt 4.5+)
 
-Since Nuxt 4.5, `<NuxtLink custom>` no longer attaches prefetch handlers for you — Nuxt can't know how you've structured your markup. The slot now exposes `prefetch`, `prefetched`, and `shouldPrefetch` so you wire it up yourself. If you migrate a link to `custom` and skip this, the link silently stops prefetching.
+`<NuxtLink custom>` has never attached prefetch handlers automatically — Nuxt can't know how you structured your markup. As of 4.5, the slot exposes `prefetch`, `prefetched`, and `shouldPrefetch` so you can wire prefetching yourself. If you migrate a link to `custom` and skip this, the link silently loses prefetching.
 
 **Incorrect (custom slot with no prefetch wiring):**
 
@@ -1399,10 +1415,11 @@ Nuxt 4.5 added the `useLayout` composable — a read-only computed ref of the la
 
 **Resolution order** (first match wins):
 
-1. An enclosing rendered `<NuxtLayout>` (when called inside one)
-2. Page `layout` metadata (`definePageMeta({ layout: ... })`)
-3. `appLayout` from matching route rules
-4. `'default'`
+1. Page `layout` metadata (`definePageMeta({ layout: ... })`)
+2. `appLayout` from matching route rules
+3. `'default'`
+
+**Note:** when called inside a rendered `<NuxtLayout>`, `useLayout` instead reflects that enclosing layout.
 
 **Key facts:**
 
@@ -1462,6 +1479,19 @@ Components that use browser-only APIs (window, document, localStorage, etc.) mus
 </template>
 ```
 
+**Note:** The default slot's content is tree-shaken out of the server build — CSS used by components inside it may not be inlined in the initial HTML, causing a flash of unstyled content (FOUC). Render a `#fallback` that reserves the same layout to minimise this.
+
+**Fallback via props (attribute alternative to the `#fallback` slot):**
+
+```vue
+<template>
+  <!-- fallback / fallback-tag render placeholder text until the client mounts -->
+  <ClientOnly fallback="Loading chart..." fallback-tag="span">
+    <ChartComponent :data="data" />
+  </ClientOnly>
+</template>
+```
+
 **Correct (using .client.vue suffix):**
 
 ```
@@ -1473,24 +1503,24 @@ components/
 
 ```vue
 <!-- Chart.client.vue - automatically client-only -->
-<script setup>
+<script setup lang="ts">
   // Safe to use browser APIs here
-  const canvas = ref<HTMLCanvasElement>()
+  const canvas = ref<HTMLCanvasElement>();
 
   onMounted(() => {
-    const ctx = canvas.value?.getContext('2d')
+    const ctx = canvas.value?.getContext('2d');
     // Initialize chart...
-  })
+  });
 </script>
 ```
 
 **Safe browser API access:**
 
 ```vue
-<script setup>
+<script setup lang="ts">
   // ✅ CORRECT - Check for client before using browser APIs
   const width = ref(0);
-  const savedSettings = (ref < Settings) | (null > null);
+  const savedSettings = ref<Settings | null>(null);
 
   onMounted(() => {
     // This only runs on client
@@ -1661,6 +1691,14 @@ Reference: [SSR Streaming — Experimental Features](https://nuxt.com/docs/guide
 
 Use Nuxt's `createError` utility for all API errors. It provides consistent error format, proper HTTP status codes, and integrates with Nuxt's error handling.
 
+**Note:** `statusCode`/`statusMessage` are legacy h3 aliases and still work, but current Nuxt docs use `status`/`statusText`.
+
+**Load-bearing behavior:** A `message` passed to `createError` in an API route does NOT propagate to the client. Use `statusText` for the short client-visible text and the `data` property for structured payloads — with `useFetch`, custom data is available at `error.value.data.data`.
+
+**`statusText` must be short HTTP-compliant text (printable ASCII);** longer detail belongs in `message` (server-side only) or `data`.
+
+**Security:** avoid putting dynamic user input into error messages/`statusText` — move any such detail into `data`.
+
 **Incorrect (throwing raw errors):**
 
 ```typescript
@@ -1686,10 +1724,11 @@ export default defineEventHandler(async (event) => {
   const user = await getUser(id);
 
   if (!user) {
+    // Don't interpolate user input into statusText — put it in data
     throw createError({
-      statusCode: 404,
-      statusMessage: 'Not Found',
-      message: `User with ID ${id} not found`,
+      status: 404,
+      statusText: 'Not Found',
+      data: { resource: 'user', id },
     });
   }
 
@@ -1702,9 +1741,8 @@ export default defineEventHandler(async (event) => {
 ```typescript
 // 400 Bad Request - Invalid input
 throw createError({
-  statusCode: 400,
-  statusMessage: 'Bad Request',
-  message: 'Invalid email format',
+  status: 400,
+  statusText: 'Bad Request',
   data: {
     field: 'email',
     reason: 'Must be a valid email address',
@@ -1713,37 +1751,33 @@ throw createError({
 
 // 401 Unauthorized - Not authenticated
 throw createError({
-  statusCode: 401,
-  statusMessage: 'Unauthorized',
-  message: 'Authentication required',
+  status: 401,
+  statusText: 'Unauthorized',
 });
 
 // 403 Forbidden - Not authorized
 throw createError({
-  statusCode: 403,
-  statusMessage: 'Forbidden',
-  message: 'You do not have permission to access this resource',
+  status: 403,
+  statusText: 'Forbidden',
 });
 
 // 404 Not Found
 throw createError({
-  statusCode: 404,
-  statusMessage: 'Not Found',
-  message: 'Resource not found',
+  status: 404,
+  statusText: 'Not Found',
 });
 
 // 409 Conflict - Duplicate
 throw createError({
-  statusCode: 409,
-  statusMessage: 'Conflict',
-  message: 'Email already registered',
+  status: 409,
+  statusText: 'Conflict',
+  data: { reason: 'Email already registered' },
 });
 
 // 422 Unprocessable Entity - Validation
 throw createError({
-  statusCode: 422,
-  statusMessage: 'Unprocessable Entity',
-  message: 'Validation failed',
+  status: 422,
+  statusText: 'Unprocessable Entity',
   data: {
     errors: validationErrors,
   },
@@ -1751,9 +1785,8 @@ throw createError({
 
 // 500 Internal Server Error
 throw createError({
-  statusCode: 500,
-  statusMessage: 'Internal Server Error',
-  message: 'An unexpected error occurred',
+  status: 500,
+  statusText: 'Internal Server Error',
 });
 ```
 
@@ -1762,36 +1795,32 @@ throw createError({
 ```typescript
 // server/utils/errors.ts
 export function notFound(resource: string, id?: string) {
+  // id is user input — keep it out of statusText, put it in data
   throw createError({
-    statusCode: 404,
-    statusMessage: 'Not Found',
-    message: id
-      ? `${resource} with ID ${id} not found`
-      : `${resource} not found`,
+    status: 404,
+    statusText: 'Not Found',
+    data: { resource, id },
   });
 }
 
-export function unauthorized(message = 'Authentication required') {
+export function unauthorized(statusText = 'Unauthorized') {
   throw createError({
-    statusCode: 401,
-    statusMessage: 'Unauthorized',
-    message,
+    status: 401,
+    statusText,
   });
 }
 
-export function forbidden(message = 'Permission denied') {
+export function forbidden(statusText = 'Forbidden') {
   throw createError({
-    statusCode: 403,
-    statusMessage: 'Forbidden',
-    message,
+    status: 403,
+    statusText,
   });
 }
 
-export function badRequest(message: string, data?: unknown) {
+export function badRequest(statusText: string, data?: unknown) {
   throw createError({
-    statusCode: 400,
-    statusMessage: 'Bad Request',
-    message,
+    status: 400,
+    statusText,
     data,
   });
 }
@@ -1816,8 +1845,13 @@ export default defineEventHandler(async (event) => {
   const { data, error } = await useFetch('/api/users/123');
 
   if (error.value) {
-    // error.value has shape: { statusCode, statusMessage, message, data }
-    console.error(error.value.message);
+    // error.value has shape: { status, statusText, data }
+    // The server `message` does NOT reach the client — read statusText/data.
+    console.error(error.value.statusText);
+
+    // Structured payload from createError({ data }) lands at error.value.data.data
+    const details = error.value.data?.data;
+    // e.g. { resource: 'user', id: '123' }
   }
 </script>
 ```
@@ -1832,7 +1866,7 @@ Reference: [Nuxt Error Handling](https://nuxt.com/docs/getting-started/error-han
 
 ## Always Add defineRouteMeta for OpenAPI Documentation
 
-Every API endpoint MUST have `defineRouteMeta` for OpenAPI documentation. This enables automatic API docs generation and helps consumers understand your API.
+Adding `defineRouteMeta` for OpenAPI documentation is recommended as a project convention on every API endpoint. It enables automatic API docs generation and helps consumers understand your API. Note that Nitro's OpenAPI generation is experimental and the metadata itself is optional.
 
 `defineRouteMeta` is a **build-time macro** that Nitro statically extracts during the build — it has no runtime presence in your handler. Because of this, it MUST be called at the **module top level** of the route file (sibling to `export default defineEventHandler(...)`), **not** inside the `defineEventHandler` callback. Putting it inside the callback places a build-time macro inside runtime request code, which is incorrect and may not be statically extracted.
 
@@ -1997,14 +2031,20 @@ export default defineNuxtConfig({
     experimental: {
       openAPI: true,
     },
+    // OpenAPI generation is experimental; endpoints are dev-only by default.
+    // Enable them in production explicitly:
+    openAPI: {
+      production: 'runtime', // or 'prerender'
+    },
   },
 });
 ```
 
 **Access generated docs:**
 
-- OpenAPI JSON: `/_nitro/openapi.json`
-- Swagger UI: `/_nitro/swagger`
+- OpenAPI JSON: `/_openapi.json`
+- Swagger UI: `/_swagger`
+- Scalar UI: `/_scalar`
 
 Reference: [Nitro Route Meta](https://nitro.unjs.io/guide/routing#route-meta) | [Nitro OpenAPI - Route Metadata](https://nitro.build/docs/openapi#route-metadata)
 
@@ -2018,6 +2058,10 @@ Reference: [Nitro Route Meta](https://nitro.unjs.io/guide/routing#route-meta) | 
 
 In Nuxt, `runtimeConfig` is the SINGLE SOURCE OF TRUTH for configuration. Never use `process.env` directly in application code.
 
+**Serialization caveat:** runtime config is serialized — it must not contain functions, Sets, Maps, or other non-serializable values.
+
+**Security:** never expose private (non-`public`) runtime config to the client — don't render it in the template or pass it to `useState`.
+
 **Incorrect (direct process.env):**
 
 ```typescript
@@ -2026,6 +2070,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
     oauth: {
       google: {
+        // A default referencing a DIFFERENTLY-named env var (GOOGLE_* here,
+        // not NUXT_OAUTH_GOOGLE_*) is read only at BUILD time and is baked in.
+        // At runtime Nuxt only overrides from the matching NUXT_-prefixed var,
+        // so this value CANNOT be changed at runtime and breaks in production.
         clientId: process.env.GOOGLE_CLIENT_ID, // NO!
         clientSecret: process.env.GOOGLE_CLIENT_SECRET, // NO!
       },
@@ -2070,16 +2118,10 @@ export default defineNuxtConfig({
 ```
 
 ```typescript
-// ✅ CORRECT - server/utils/auth.ts
-const config = useRuntimeConfig();
-
-if (config.oauth.google.clientId) {
-  // Fully typed configuration access
-}
-
 // ✅ CORRECT - server/api/payment.ts
+// Pass the event so per-request runtime env overrides apply (docs-recommended).
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig();
+  const config = useRuntimeConfig(event);
   const stripe = new Stripe(config.stripe.secretKey);
   // ...
 });
@@ -2202,9 +2244,9 @@ export type CreateUserInput = z.infer<typeof createUserSchema>;
 import { userQuerySchema } from '#shared/schemas/user';
 
 export default defineEventHandler(async (event) => {
-  // Validates and returns typed object
-  // Throws 400 automatically on invalid input
-  const query = await getValidatedQuery(event, userQuerySchema.parse);
+  // Pass the Zod schema object directly (h3 v2 Standard-Schema support).
+  // Validates and returns typed object; throws 400 automatically on invalid input.
+  const query = await getValidatedQuery(event, userQuerySchema);
 
   // query is fully typed: { page: number, limit: number, search?: string, status?: 'active' | 'inactive' }
   return await getUsers(query);
@@ -2215,12 +2257,14 @@ import { createUserSchema } from '#shared/schemas/user';
 
 export default defineEventHandler(async (event) => {
   // Validates body against schema
-  const body = await readValidatedBody(event, createUserSchema.parse);
+  const body = await readValidatedBody(event, createUserSchema);
 
   // body is typed: { name: string, email: string, role: 'user' | 'admin' }
   return await createUser(body);
 });
 ```
+
+**Note:** Passing `schema.parse` also works — any validation function is accepted.
 
 **Using safeParse for custom error handling:**
 
@@ -2256,7 +2300,7 @@ const paramsSchema = z.object({
 });
 
 export default defineEventHandler(async (event) => {
-  const { id } = await getValidatedRouterParams(event, paramsSchema.parse);
+  const { id } = await getValidatedRouterParams(event, paramsSchema);
   return await getUser(id);
 });
 ```
@@ -2271,7 +2315,7 @@ export default defineEventHandler(async (event) => {
 | Default values       | ❌  | ✅        |
 | Schema reusability   | ❌  | ✅        |
 
-Reference: [Nitro Validation](https://nitro.unjs.io/guide/utils#validation)
+Reference: [h3 Request Utils](https://h3.dev/utils/request)
 
 ---
 
@@ -2282,6 +2326,10 @@ Reference: [Nitro Validation](https://nitro.unjs.io/guide/utils#validation)
 ## Use useState for SSR-Safe Shared State
 
 In Nuxt, `useState` is SSR-safe and handles hydration correctly. Using plain `ref()` for shared state causes hydration mismatches and state leakage between server requests.
+
+**Serialization constraint:** `useState` data is serialized to JSON to transfer it from server to client — it must be a plain object/array/primitive. It must NOT contain classes, functions, or symbols, or you'll hit a `Cannot stringify arbitrary non-POJOs` error.
+
+**Reserved name:** `useState` is a reserved, compiler-transformed name — don't name your own functions `useState`.
 
 **Incorrect (plain ref for shared state):**
 
@@ -2327,8 +2375,9 @@ export function useUser() {
   const user = useState<User | null>('user', () => null);
 
   async function fetchUser() {
-    const { data } = await useFetch('/api/me');
-    user.value = data.value;
+    // useFetch belongs in setup context only — use $fetch in imperative methods
+    const data = await $fetch('/api/me');
+    user.value = data;
   }
 
   return { user, fetchUser };
@@ -2459,18 +2508,9 @@ import { formatDate } from '#shared/utils/date';
 | `~~/`      | Project root | Server code     | `~~/server/types/`   |
 | `#imports` | Auto-imports | Anywhere        | `#imports`           |
 
-**Configure shared alias in nuxt.config:**
+**No manual configuration needed:** `#shared` is configured automatically by Nuxt for the root `shared/` directory (v3.14+) — no manual alias or `extends` config required.
 
-```typescript
-// nuxt.config.ts
-export default defineNuxtConfig({
-  alias: {
-    '#shared': '../shared', // If shared is at project root
-  },
-  // Or use layers
-  extends: ['./shared'],
-});
-```
+**Note:** only top-level `shared/utils/` and `shared/types/` files are auto-imported; everything else in `shared/` needs an explicit `#shared/...` import.
 
 **Type-only imports:**
 
@@ -2662,77 +2702,67 @@ Reference: [TypeScript Best Practices](https://www.typescriptlang.org/docs/handb
 
 ---
 
-### Use kebab-case Emits with Full Type Definitions
+### Type Emits Fully with camelCase Declarations
 
 **Impact:** MEDIUM - Ensures consistent event naming and type safety
 
-## Use kebab-case Emits with Full Type Definitions
+## Type Emits Fully with camelCase Declarations
 
-All Vue component emits MUST use kebab-case consistently across `defineEmits`, `emit()` calls, and template event handlers.
+Declare and emit events in camelCase; listen in kebab-case in templates. Vue's automatic case transformation bridges the two, so this is the documented convention — NOT kebab-case declarations. Always type emits fully with the 3.3+ named-tuple syntax; never use untyped emits.
 
-**Incorrect (camelCase emits):**
-
-```vue
-<script setup lang="ts">
-  // ❌ WRONG - camelCase in defineEmits
-  const emit = defineEmits<{
-    manageSubscription: []; // NO! Use kebab-case
-    toggleVisibility: [id: string, visible: boolean]; // NO!
-    updateValue: [value: number]; // NO!
-  }>();
-
-  // Inconsistent emit calls
-  emit('manageSubscription');
-  emit('toggleVisibility', id, true);
-</script>
-```
-
-**Correct (kebab-case everywhere):**
+**Incorrect (kebab-case declarations / untyped emits):**
 
 ```vue
 <script setup lang="ts">
-  // ✅ CORRECT - kebab-case with quotes in defineEmits
+  // ❌ WRONG - kebab-case in defineEmits contradicts Vue's convention
   const emit = defineEmits<{
     'manage-subscription': [];
-    'toggle-visibility': [id: string, visible: boolean];
     'update-value': [value: number];
   }>();
 
-  // Consistent emit calls
-  emit('manage-subscription');
-  emit('toggle-visibility', id, true);
-  emit('update-value', 42);
+  // ❌ WRONG - untyped emits (no payload types)
+  const emit = defineEmits(['manageSubscription', 'updateValue']);
 </script>
 ```
 
-**Parent component usage:**
+**Correct (camelCase declarations, 3.3+ named-tuple syntax):**
+
+```vue
+<script setup lang="ts">
+  // ✅ CORRECT - declare emits in camelCase with typed payloads
+  const emit = defineEmits<{
+    change: [id: number];
+    updateValue: [value: string];
+  }>();
+
+  // Emit in camelCase
+  emit('change', 1);
+  emit('updateValue', 'hello');
+</script>
+```
+
+**Parent component usage (listen in kebab-case):**
 
 ```vue
 <template>
-  <!-- kebab-case in template event handlers -->
-  <ChildComponent
-    @manage-subscription="handleManageSubscription"
-    @toggle-visibility="handleToggleVisibility"
-    @update-value="handleUpdateValue"
-  />
+  <!-- Listen in kebab-case — Vue transforms camelCase ↔ kebab-case automatically -->
+  <ChildComponent @change="handleChange" @update-value="handleUpdateValue" />
 </template>
 
 <script setup lang="ts">
-  function handleManageSubscription() {
+  function handleChange(id: number) {
     // ...
   }
 
-  function handleToggleVisibility(id: string, visible: boolean) {
-    // ...
-  }
-
-  function handleUpdateValue(value: number) {
+  function handleUpdateValue(value: string) {
     // ...
   }
 </script>
 ```
 
-**With v-model:**
+**With v-model — the event MUST be `update:modelValue` (camelCase):**
+
+`v-model` requires the event name `update:modelValue` matching the `modelValue` prop. `'update:model-value'` (kebab-case) breaks `v-model`.
 
 ```vue
 <!-- Child component -->
@@ -2741,13 +2771,13 @@ All Vue component emits MUST use kebab-case consistently across `defineEmits`, `
     modelValue: string;
   }>();
 
-  // v-model emits use 'update:modelValue' pattern
+  // ✅ CORRECT - camelCase 'update:modelValue' matches the modelValue prop
   const emit = defineEmits<{
-    'update:model-value': [value: string]; // kebab-case
+    'update:modelValue': [value: string];
   }>();
 
   function updateValue(newValue: string) {
-    emit('update:model-value', newValue);
+    emit('update:modelValue', newValue);
   }
 </script>
 
@@ -2759,6 +2789,22 @@ All Vue component emits MUST use kebab-case consistently across `defineEmits`, `
 </template>
 ```
 
+**Preferred (Vue 3.4+): use `defineModel()` for v-model bindings:**
+
+`defineModel()` is the modern macro for v-model — it wires the `modelValue` prop and `update:modelValue` event for you.
+
+```vue
+<!-- Child component -->
+<script setup lang="ts">
+  // Two-way binding — no manual prop + emit needed
+  const model = defineModel<string>();
+
+  function updateValue(newValue: string) {
+    model.value = newValue;
+  }
+</script>
+```
+
 **Named function handlers (avoid inline arrows):**
 
 ```vue
@@ -2766,15 +2812,19 @@ All Vue component emits MUST use kebab-case consistently across `defineEmits`, `
 <template>
   <LayerTree
     @toggle-visibility="
-      (layerId, visible) => emit('toggle-layer-visibility', layerId, visible)
+      (layerId, visible) => emit('toggleLayerVisibility', layerId, visible)
     "
   />
 </template>
 
 <!-- ✅ CORRECT - Named function -->
-<script setup>
+<script setup lang="ts">
+  const emit = defineEmits<{
+    toggleLayerVisibility: [layerId: string, visible: boolean];
+  }>();
+
   function handleToggleVisibility(layerId: string, visible: boolean) {
-    emit('toggle-layer-visibility', layerId, visible)
+    emit('toggleLayerVisibility', layerId, visible);
   }
 </script>
 
@@ -2785,17 +2835,18 @@ All Vue component emits MUST use kebab-case consistently across `defineEmits`, `
 
 **The pattern summary:**
 
-| Location           | Format                  | Example                          |
-| ------------------ | ----------------------- | -------------------------------- |
-| `defineEmits` type | `'kebab-case'` (quoted) | `'manage-subscription': []`      |
-| `emit()` call      | `'kebab-case'`          | `emit('manage-subscription')`    |
-| Template `@event`  | `@kebab-case`           | `@manage-subscription="handler"` |
+| Location           | Format                          | Example                        |
+| ------------------ | ------------------------------- | ------------------------------ |
+| `defineEmits` type | camelCase, typed named-tuple    | `updateValue: [value: string]` |
+| `emit()` call      | camelCase                       | `emit('updateValue', v)`       |
+| Template `@event`  | kebab-case (auto-transformed)   | `@update-value="handler"`      |
+| v-model event      | `update:modelValue` (camelCase) | `emit('update:modelValue', v)` |
 
-**Why kebab-case?**
+**Why this convention?**
 
-1. Consistency with HTML attribute conventions
-2. Makes event names grep-able across templates and scripts
-3. Avoids confusion between JS camelCase and HTML kebab-case
-4. Matches Vue's official style guide
+1. Matches Vue's documented case-transformation behavior (declare/emit camelCase, listen kebab-case)
+2. `update:modelValue` must stay camelCase or `v-model` breaks
+3. Full payload typing catches wrong-argument bugs at compile time
+4. `defineModel()` removes the manual prop+emit boilerplate for two-way bindings
 
-Reference: [Vue Style Guide - Events](https://vuejs.org/style-guide/rules-strongly-recommended.html#component-event-casing)
+Reference: [Typing Component Emits](https://vuejs.org/guide/typescript/composition-api.html#typing-component-emits) | [Component Events](https://vuejs.org/guide/components/events.html)

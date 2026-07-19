@@ -7,7 +7,7 @@ tags: server, api, openapi, documentation, nitro
 
 ## Always Add defineRouteMeta for OpenAPI Documentation
 
-Every API endpoint MUST have `defineRouteMeta` for OpenAPI documentation. This enables automatic API docs generation and helps consumers understand your API.
+Adding `defineRouteMeta` for OpenAPI documentation is recommended as a project convention on every API endpoint. It enables automatic API docs generation and helps consumers understand your API. Note that Nitro's OpenAPI generation is experimental and the metadata itself is optional.
 
 `defineRouteMeta` is a **build-time macro** that Nitro statically extracts during the build — it has no runtime presence in your handler. Because of this, it MUST be called at the **module top level** of the route file (sibling to `export default defineEventHandler(...)`), **not** inside the `defineEventHandler` callback. Putting it inside the callback places a build-time macro inside runtime request code, which is incorrect and may not be statically extracted.
 
@@ -172,13 +172,19 @@ export default defineNuxtConfig({
     experimental: {
       openAPI: true,
     },
+    // OpenAPI generation is experimental; endpoints are dev-only by default.
+    // Enable them in production explicitly:
+    openAPI: {
+      production: 'runtime', // or 'prerender'
+    },
   },
 });
 ```
 
 **Access generated docs:**
 
-- OpenAPI JSON: `/_nitro/openapi.json`
-- Swagger UI: `/_nitro/swagger`
+- OpenAPI JSON: `/_openapi.json`
+- Swagger UI: `/_swagger`
+- Scalar UI: `/_scalar`
 
 Reference: [Nitro Route Meta](https://nitro.unjs.io/guide/routing#route-meta) | [Nitro OpenAPI - Route Metadata](https://nitro.build/docs/openapi#route-metadata)

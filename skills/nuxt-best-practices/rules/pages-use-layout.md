@@ -41,10 +41,11 @@ Nuxt 4.5 added the `useLayout` composable — a read-only computed ref of the la
 
 **Resolution order** (first match wins):
 
-1. An enclosing rendered `<NuxtLayout>` (when called inside one)
-2. Page `layout` metadata (`definePageMeta({ layout: ... })`)
-3. `appLayout` from matching route rules
-4. `'default'`
+1. Page `layout` metadata (`definePageMeta({ layout: ... })`)
+2. `appLayout` from matching route rules
+3. `'default'`
+
+**Note:** when called inside a rendered `<NuxtLayout>`, `useLayout` instead reflects that enclosing layout.
 
 **Key facts:**
 

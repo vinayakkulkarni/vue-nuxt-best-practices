@@ -92,7 +92,7 @@ Reference these guidelines when:
 - `types-import-paths` - Use correct import paths (#shared, ~/, ~~/)
 - `types-no-any` - Never use `any` type
 - `types-zod-schemas` - Use Zod for runtime validation with type inference
-- `types-strict-emits` - Use kebab-case emits with full type definitions
+- `types-strict-emits` - Type emits fully; declare camelCase, listen kebab-case
 
 ### 8. Modules & Plugins (LOW-MEDIUM)
 

@@ -78,7 +78,7 @@ enabled: () => cond; // getter
 | Behavior               | What happens                                                        |
 | ---------------------- | ------------------------------------------------------------------- |
 | `enabled` is `false`   | Initial fetch, `execute()`, `refresh()`, and watch triggers blocked |
-| Flips `true` → `false` | In-flight request cancelled, status returns to `idle`               |
+| Flips `true` → `false` | In-flight request cancelled; existing `data` retained               |
 | Data on disable        | **Kept** — not cleared (call `clear()` yourself if needed)          |
 | Flips `false` → `true` | Does NOT auto-refetch — a trigger (watch/execute) must fire         |
 

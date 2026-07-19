@@ -7,7 +7,7 @@ tags: pages, routing, NuxtLink, prefetch, custom-slot, nuxt-4.5
 
 ## Wire Prefetch Manually in NuxtLink Custom Slots (Nuxt 4.5+)
 
-Since Nuxt 4.5, `<NuxtLink custom>` no longer attaches prefetch handlers for you — Nuxt can't know how you've structured your markup. The slot now exposes `prefetch`, `prefetched`, and `shouldPrefetch` so you wire it up yourself. If you migrate a link to `custom` and skip this, the link silently stops prefetching.
+`<NuxtLink custom>` has never attached prefetch handlers automatically — Nuxt can't know how you structured your markup. As of 4.5, the slot exposes `prefetch`, `prefetched`, and `shouldPrefetch` so you can wire prefetching yourself. If you migrate a link to `custom` and skip this, the link silently loses prefetching.
 
 **Incorrect (custom slot with no prefetch wiring):**
 
