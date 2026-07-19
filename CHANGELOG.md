@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.7.0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.6.1...v1.7.0) (2026-07-19)
+
+
+### Features
+
+* **nuxt:** update skills for nuxt 4.5 ([a204be0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/a204be003aacb55e3b4fecdf02e82c06de820140))
+
+
+### Bug Fixes
+
+* align all skill rules with official docs after audit ([6a889c0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/6a889c0213d055b50bae01459ebe208dfb0eb235))
+* override unhead to 3.2.1 to fix cloudflare preset build ([384978f](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/384978f40146b2e4ffd75703d2b373fb735a366a))
+
+
+### Miscellaneous
+
+* rename fmt scripts to format ([f8ab3ec](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/f8ab3ecc799796af85e450898e4c5917689c2279))
+
 ## [1.6.1](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.6.0...v1.6.1) (2026-07-13)
 
 
