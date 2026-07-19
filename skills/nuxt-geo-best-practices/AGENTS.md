@@ -1,7 +1,7 @@
 # Nuxt GEO Best Practices - Complete Reference
 
 > This file is auto-generated. Do not edit directly.
-> Edit individual rule files in the `rules/` directory and run `bun run build`.
+> Edit individual rule files in the `rules/` directory and run `pnpm build`.
 
 # Nuxt GEO Best Practices
 
@@ -40,6 +40,8 @@ Nuxt 4 ships first-class SEO/meta primitives. Read these before reinventing anyt
 
 The `usePageGeo` composable in `page-use-page-geo.md` is a thin wrapper over these primitives; it is **not** a replacement for them.
 
+> **Nuxt 4.5 note:** head management now runs on `unhead` v3 — stricter `useHead` typing and no promise input. The `useHead` JSON-LD injection patterns in this skill use plain synchronous values and are v3-compatible. Also, 4.5's experimental SSR streaming is bot-aware: crawlers automatically receive fully-buffered HTML, so enabling it does not hurt GEO (see `ai-ssr-for-crawlers`).
+
 ## Evidence Base
 
 These rules synthesize:
@@ -52,12 +54,12 @@ These rules synthesize:
 
 ## Rule Categories by Priority
 
-| Priority | Category | Impact | Prefix |
-|----------|----------|--------|--------|
-| 1 | Content Extractability (the +40% levers) | CRITICAL | `content-` |
-| 2 | AI Crawler & Discovery | CRITICAL | `ai-` |
-| 3 | Entity Clarity | HIGH | `entity-` |
-| 4 | Page-Level GEO | HIGH | `page-` |
+| Priority | Category                                 | Impact   | Prefix     |
+| -------- | ---------------------------------------- | -------- | ---------- |
+| 1        | Content Extractability (the +40% levers) | CRITICAL | `content-` |
+| 2        | AI Crawler & Discovery                   | CRITICAL | `ai-`      |
+| 3        | Entity Clarity                           | HIGH     | `entity-`  |
+| 4        | Page-Level GEO                           | HIGH     | `page-`    |
 
 ## Quick Reference
 
@@ -104,6 +106,7 @@ rules/_sections.md
 ```
 
 Each rule file contains:
+
 - Brief explanation of why it matters (with arxiv evidence where applicable)
 - Incorrect code example with explanation
 - Correct Nuxt-specific code example
@@ -148,7 +151,11 @@ export default defineEventHandler(async (event) => {
   const baseUrl = config.public.baseUrl || 'https://example.com';
 
   setResponseHeader(event, 'Content-Type', 'text/plain; charset=utf-8');
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600');
+  setResponseHeader(
+    event,
+    'Cache-Control',
+    'public, max-age=3600, s-maxage=3600',
+  );
 
   return `# My App
 
@@ -200,7 +207,11 @@ const PRIORITY_ROUTES = [
 
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Content-Type', 'text/plain; charset=utf-8');
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600');
+  setResponseHeader(
+    event,
+    'Cache-Control',
+    'public, max-age=3600, s-maxage=3600',
+  );
 
   const config = useRuntimeConfig();
   const baseUrl = config.public.baseUrl || 'https://example.com';
@@ -275,7 +286,7 @@ curl -s https://your-site.com/llms-full.txt | wc -c
 
 ### Test that ChatGPT/Claude can fetch it
 
-Open ChatGPT and prompt: *"Fetch https://your-site.com/llms.txt and summarize the most important pages."* If it returns the structured index, you're set.
+Open ChatGPT and prompt: _"Fetch https://your-site.com/llms.txt and summarize the most important pages."_ If it returns the structured index, you're set.
 
 ### When to update
 
@@ -427,9 +438,7 @@ export default defineNuxtConfig({
       },
     ],
 
-    sitemap: [
-      'https://example.com/sitemap.xml',
-    ],
+    sitemap: ['https://example.com/sitemap.xml'],
   },
 });
 ```
@@ -441,20 +450,20 @@ Block specific pages from AI crawlers without touching `robots.txt`:
 ```vue
 <!-- pages/private-internal-doc.vue -->
 <script setup lang="ts">
-// With @nuxtjs/robots installed — emits <meta name="robots" content="noindex">
-useRobotsRule({ index: false, follow: false });
+  // With @nuxtjs/robots installed — emits <meta name="robots" content="noindex">
+  useRobotsRule({ index: false, follow: false });
 </script>
 ```
 
 ### Decision matrix — should you allow AI crawlers?
 
-| Site type | Recommendation |
-|-----------|---------------|
-| Marketing site, docs, blog | **Allow all** — being cited in AI answers is the goal |
-| Open-source project | **Allow all** — drives developer adoption |
-| Paywalled content (news, research) | **Allow GPTBot/Claude only on free pages**, disallow paid |
-| Internal tool, customer dashboard | **Disallow all** AI crawlers + classic crawlers |
-| User-generated content with PII risk | **Disallow** until you've audited what's exposed |
+| Site type                            | Recommendation                                            |
+| ------------------------------------ | --------------------------------------------------------- |
+| Marketing site, docs, blog           | **Allow all** — being cited in AI answers is the goal     |
+| Open-source project                  | **Allow all** — drives developer adoption                 |
+| Paywalled content (news, research)   | **Allow GPTBot/Claude only on free pages**, disallow paid |
+| Internal tool, customer dashboard    | **Disallow all** AI crawlers + classic crawlers           |
+| User-generated content with PII risk | **Disallow** until you've audited what's exposed          |
 
 ### Verify the policy is live
 
@@ -473,18 +482,18 @@ curl -s -A "Google-Extended" https://your-site.com/robots.txt
 
 ### Crawler reference list (current as of 2026)
 
-| Crawler | User-Agent | What it powers |
-|---------|------------|----------------|
-| GPTBot | `GPTBot` | ChatGPT browse + training |
-| ChatGPT-User | `ChatGPT-User` | User-initiated ChatGPT browsing |
-| ClaudeBot | `ClaudeBot`, `anthropic-ai`, `Claude-Web` | Claude web search + training |
-| PerplexityBot | `PerplexityBot`, `Perplexity-User` | Perplexity search |
-| Google-Extended | `Google-Extended` | Gemini, AI Overviews, AI Mode (separate from Googlebot) |
-| Applebot-Extended | `Applebot-Extended` | Apple Intelligence (separate from Applebot) |
-| CCBot | `CCBot` | Common Crawl (used by many LLMs) |
-| Bytespider | `Bytespider` | ByteDance / Doubao |
-| meta-externalagent | `meta-externalagent`, `FacebookBot` | Meta AI |
-| cohere-ai | `cohere-ai` | Cohere |
+| Crawler            | User-Agent                                | What it powers                                          |
+| ------------------ | ----------------------------------------- | ------------------------------------------------------- |
+| GPTBot             | `GPTBot`                                  | ChatGPT browse + training                               |
+| ChatGPT-User       | `ChatGPT-User`                            | User-initiated ChatGPT browsing                         |
+| ClaudeBot          | `ClaudeBot`, `anthropic-ai`, `Claude-Web` | Claude web search + training                            |
+| PerplexityBot      | `PerplexityBot`, `Perplexity-User`        | Perplexity search                                       |
+| Google-Extended    | `Google-Extended`                         | Gemini, AI Overviews, AI Mode (separate from Googlebot) |
+| Applebot-Extended  | `Applebot-Extended`                       | Apple Intelligence (separate from Applebot)             |
+| CCBot              | `CCBot`                                   | Common Crawl (used by many LLMs)                        |
+| Bytespider         | `Bytespider`                              | ByteDance / Doubao                                      |
+| meta-externalagent | `meta-externalagent`, `FacebookBot`       | Meta AI                                                 |
+| cohere-ai          | `cohere-ai`                               | Cohere                                                  |
 
 Reference: [`@nuxtjs/robots`](https://nuxtseo.com/docs/robots) · [OpenAI GPTBot docs](https://platform.openai.com/docs/gptbot) · [Google-Extended announcement](https://blog.google/technology/ai/an-update-on-web-publisher-controls/) · [darkvisitors.com](https://darkvisitors.com) (live AI crawler list)
 
@@ -595,7 +604,11 @@ export default defineEventHandler(async (event) => {
   ];
 
   setResponseHeader(event, 'Content-Type', 'application/xml; charset=utf-8');
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600');
+  setResponseHeader(
+    event,
+    'Cache-Control',
+    'public, max-age=3600, s-maxage=3600',
+  );
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -614,12 +627,12 @@ ${urls
 
 ### `lastmod` accuracy matters — don't fake it
 
-| Behavior | Effect |
-|----------|--------|
-| Accurate per-URL `lastmod` from CMS/DB | **Best** — crawlers prioritize fresh content correctly |
+| Behavior                                        | Effect                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------- |
+| Accurate per-URL `lastmod` from CMS/DB          | **Best** — crawlers prioritize fresh content correctly              |
 | File mtime (auto-detected by `@nuxtjs/sitemap`) | **Good** — works for static content, slightly noisy if you reformat |
-| `lastmod = build time` for everything | **Bad** — every URL looks "fresh", crawlers ignore the signal |
-| No `lastmod` at all | **Bad** — crawlers fall back to their own heuristics |
+| `lastmod = build time` for everything           | **Bad** — every URL looks "fresh", crawlers ignore the signal       |
+| No `lastmod` at all                             | **Bad** — crawlers fall back to their own heuristics                |
 
 ### Reference the sitemap from `robots.txt`
 
@@ -665,11 +678,13 @@ Unlike Googlebot (which renders JS), most AI crawlers — GPTBot, ClaudeBot, Per
 <!-- What an AI crawler sees on a CSR Nuxt build -->
 <!DOCTYPE html>
 <html>
-<head><title>My App</title></head>
-<body>
-  <div id="__nuxt"></div>
-  <script src="/_nuxt/entry.js"></script>
-</body>
+  <head>
+    <title>My App</title>
+  </head>
+  <body>
+    <div id="__nuxt"></div>
+    <script src="/_nuxt/entry.js"></script>
+  </body>
 </html>
 ```
 
@@ -714,12 +729,7 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       crawlLinks: true,
-      routes: [
-        '/',
-        '/docs',
-        '/pricing',
-        '/blog',
-      ],
+      routes: ['/', '/docs', '/pricing', '/blog'],
     },
   },
 
@@ -796,15 +806,15 @@ A subtle bug: if you use `useFetch` with `{ server: false }`, the data is only f
 ```vue
 <!-- ❌ WRONG — { server: false } means SSR has no data → empty page for AI -->
 <script setup lang="ts">
-const { data } = await useFetch('/api/posts', { server: false });
+  const { data } = await useFetch('/api/posts', { server: false });
 </script>
 ```
 
 ```vue
 <!-- ✅ CORRECT — default behavior fetches on server, hydrates on client -->
 <script setup lang="ts">
-const { data: posts } = await useFetch('/api/posts');
-// posts is populated server-side → AI crawler sees the rendered list
+  const { data: posts } = await useFetch('/api/posts');
+  // posts is populated server-side → AI crawler sees the rendered list
 </script>
 
 <template>
@@ -818,14 +828,14 @@ const { data: posts } = await useFetch('/api/posts');
 
 ### `<ClientOnly>` is fine for widgets — bad for content
 
-| Component type | `<ClientOnly>` OK? |
-|----------------|--------------------|
-| Article body, product description, FAQ | **No** — must be SSR'd |
-| Headings, navigation, footer links | **No** — must be SSR'd |
-| Pricing tables, feature comparisons | **No** — must be SSR'd |
-| Comment widget, live chat, analytics | **Yes** — AI doesn't need these |
-| Date/time pickers, charts that need `window` | **Yes** |
-| Auth-gated dashboard widgets | **Yes** |
+| Component type                               | `<ClientOnly>` OK?              |
+| -------------------------------------------- | ------------------------------- |
+| Article body, product description, FAQ       | **No** — must be SSR'd          |
+| Headings, navigation, footer links           | **No** — must be SSR'd          |
+| Pricing tables, feature comparisons          | **No** — must be SSR'd          |
+| Comment widget, live chat, analytics         | **Yes** — AI doesn't need these |
+| Date/time pickers, charts that need `window` | **Yes**                         |
+| Auth-gated dashboard widgets                 | **Yes**                         |
 
 ### What about prerender + ISR?
 
@@ -842,6 +852,23 @@ routeRules: {
   },
 },
 ```
+
+### What about SSR streaming (Nuxt 4.5+)?
+
+Nuxt 4.5's experimental `ssrStreaming` is **bot-aware**: requests from crawler user agents automatically fall back to the fully-buffered renderer, so search engines and AI crawlers still receive complete HTML in one response. Enabling streaming for human visitors does not hurt GEO. If you run niche crawlers you care about, extend the matcher:
+
+```ts
+export default defineNuxtConfig({
+  experimental: {
+    ssrStreaming: {
+      // These UAs get buffered (fully-rendered) HTML
+      botRegex: /googlebot|bingbot|gptbot|claudebot|perplexitybot/i,
+    },
+  },
+});
+```
+
+Note the default `botRegex` already targets indexing crawlers — only override it to ADD bots, and keep the defaults' spirit (see sibling skill `nuxt-best-practices` rule `rendering-ssr-streaming` for the full caveat list).
 
 Reference: [Nuxt 4 Rendering Modes](https://nuxt.com/docs/4.x/guide/concepts/rendering) · [Nitro Prerender](https://nitro.unjs.io/config#prerender) · [Nuxt `<ClientOnly>`](https://nuxt.com/docs/4.x/api/components/client-only) · [Nuxt SEO docs](https://nuxt.com/docs/4.x/getting-started/seo-meta) · sibling skill `nuxt-best-practices` (rendering modes section)
 
@@ -879,22 +906,22 @@ The GEO paper's "Cite Sources" method produced one of the largest visibility lif
 ```vue
 <!-- ✅ CORRECT — citations turn opinion into evidence the LLM will surface -->
 <script setup lang="ts">
-const sources = [
-  {
-    id: 'google-cwv',
-    title: 'Core Web Vitals & Conversion Rate',
-    publisher: 'Google',
-    url: 'https://web.dev/vitals-business-impact/',
-    accessed: '2026-04-15',
-  },
-  {
-    id: 'akamai-2024',
-    title: 'State of Online Retail Performance',
-    publisher: 'Akamai',
-    url: 'https://www.akamai.com/state-of-online-retail',
-    accessed: '2026-04-15',
-  },
-];
+  const sources = [
+    {
+      id: 'google-cwv',
+      title: 'Core Web Vitals & Conversion Rate',
+      publisher: 'Google',
+      url: 'https://web.dev/vitals-business-impact/',
+      accessed: '2026-04-15',
+    },
+    {
+      id: 'akamai-2024',
+      title: 'State of Online Retail Performance',
+      publisher: 'Akamai',
+      url: 'https://www.akamai.com/state-of-online-retail',
+      accessed: '2026-04-15',
+    },
+  ];
 </script>
 
 <template>
@@ -919,38 +946,42 @@ Standardize citation rendering and emit JSON-LD `citation` properties so AI craw
 ```vue
 <!-- app/components/Geo/Sources.vue -->
 <script setup lang="ts">
-interface Source {
-  id: string;
-  title: string;
-  publisher?: string;
-  author?: string;
-  url: string;
-  accessed?: string;
-  datePublished?: string;
-}
+  interface Source {
+    id: string;
+    title: string;
+    publisher?: string;
+    author?: string;
+    url: string;
+    accessed?: string;
+    datePublished?: string;
+  }
 
-const props = defineProps<{ sources: Source[] }>();
+  const props = defineProps<{ sources: Source[] }>();
 
-// Emit Schema.org Article citations for the LLMs that parse JSON-LD
-useHead({
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Article',
-        citation: props.sources.map((s) => ({
-          '@type': 'CreativeWork',
-          name: s.title,
-          url: s.url,
-          publisher: s.publisher ? { '@type': 'Organization', name: s.publisher } : undefined,
-          author: s.author ? { '@type': 'Person', name: s.author } : undefined,
-          datePublished: s.datePublished,
-        })),
-      }),
-    },
-  ],
-});
+  // Emit Schema.org Article citations for the LLMs that parse JSON-LD
+  useHead({
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          citation: props.sources.map((s) => ({
+            '@type': 'CreativeWork',
+            name: s.title,
+            url: s.url,
+            publisher: s.publisher
+              ? { '@type': 'Organization', name: s.publisher }
+              : undefined,
+            author: s.author
+              ? { '@type': 'Person', name: s.author }
+              : undefined,
+            datePublished: s.datePublished,
+          })),
+        }),
+      },
+    ],
+  });
 </script>
 
 <template>
@@ -961,7 +992,9 @@ useHead({
         <a :href="s.url" rel="noopener external">
           {{ s.title }}<span v-if="s.publisher"> — {{ s.publisher }}</span>
         </a>
-        <span v-if="s.accessed" class="accessed"> (accessed {{ s.accessed }})</span>
+        <span v-if="s.accessed" class="accessed">
+          (accessed {{ s.accessed }})</span
+        >
       </li>
     </ol>
   </section>
@@ -972,12 +1005,12 @@ useHead({
 
 LLMs weight sources differently. From most to least preferred (observed via Semrush AI Visibility Index, Oct 2025):
 
-| Tier | Examples |
-|------|----------|
-| **S** (highest) | Peer-reviewed papers (arXiv, PubMed, IEEE), official docs (MDN, Nuxt, Vue), government data (`.gov`, EU Open Data) |
-| **A** | Established news (Reuters, AP, FT, NYT), Wikipedia (with cited sources), industry incumbents (Google, Cloudflare, Vercel) |
-| **B** | Reddit (subreddit-dependent), Stack Overflow accepted answers, GitHub README of 1000+ star repos, conference talks |
-| **C** | Personal blogs without citations, Medium without author credentials, marketing pages |
+| Tier            | Examples                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **S** (highest) | Peer-reviewed papers (arXiv, PubMed, IEEE), official docs (MDN, Nuxt, Vue), government data (`.gov`, EU Open Data)        |
+| **A**           | Established news (Reuters, AP, FT, NYT), Wikipedia (with cited sources), industry incumbents (Google, Cloudflare, Vercel) |
+| **B**           | Reddit (subreddit-dependent), Stack Overflow accepted answers, GitHub README of 1000+ star repos, conference talks        |
+| **C**           | Personal blogs without citations, Medium without author credentials, marketing pages                                      |
 
 Cite from S/A tier whenever possible. **Self-citation also helps** — link to your own past articles to build a topical authority cluster the LLM can navigate.
 
@@ -1029,21 +1062,22 @@ Why it fails on generative engines:
 ```vue
 <!-- ❌ WRONG — reads like 2012 SEO; LLMs ignore or downrank this -->
 <script setup lang="ts">
-usePageSeo({
-  title: 'Best Nuxt Hosting | Cheap Nuxt Hosting | Nuxt Hosting Reviews',
-  description: 'Looking for the best Nuxt hosting? Compare cheap Nuxt hosting providers. Find affordable Nuxt hosting solutions and Nuxt hosting deals.',
-  path: '/best-nuxt-hosting',
-})
+  usePageSeo({
+    title: 'Best Nuxt Hosting | Cheap Nuxt Hosting | Nuxt Hosting Reviews',
+    description:
+      'Looking for the best Nuxt hosting? Compare cheap Nuxt hosting providers. Find affordable Nuxt hosting solutions and Nuxt hosting deals.',
+    path: '/best-nuxt-hosting',
+  });
 </script>
 
 <template>
   <article>
     <h1>Best Nuxt Hosting in 2026</h1>
     <p>
-      When choosing the best Nuxt hosting, you need a Nuxt hosting provider
-      that offers cheap Nuxt hosting with great Nuxt hosting features. Our
-      Nuxt hosting reviews compare top Nuxt hosting solutions for Nuxt hosting
-      buyers looking for affordable Nuxt hosting in 2026.
+      When choosing the best Nuxt hosting, you need a Nuxt hosting provider that
+      offers cheap Nuxt hosting with great Nuxt hosting features. Our Nuxt
+      hosting reviews compare top Nuxt hosting solutions for Nuxt hosting buyers
+      looking for affordable Nuxt hosting in 2026.
     </p>
     <h2>Top 10 Nuxt Hosting Providers</h2>
     <!-- ...repeated keyword soup... -->
@@ -1056,13 +1090,15 @@ usePageSeo({
 ```vue
 <!-- ✅ CORRECT — names entities once, uses statistics, varies vocabulary -->
 <script setup lang="ts">
-usePageGeo({
-  title: 'Where to Deploy a Nuxt 4 App in 2026 — Cloudflare, Vercel, Netlify, AWS Compared',
-  description: 'Cold-start latency, pricing per million requests, and DX comparison for the four most-used deployment targets for Nuxt 4 apps.',
-  path: '/blog/nuxt-deployment-comparison',
-  type: 'Article',
-  datePublished: '2026-04-01',
-})
+  usePageGeo({
+    title:
+      'Where to Deploy a Nuxt 4 App in 2026 — Cloudflare, Vercel, Netlify, AWS Compared',
+    description:
+      'Cold-start latency, pricing per million requests, and DX comparison for the four most-used deployment targets for Nuxt 4 apps.',
+    path: '/blog/nuxt-deployment-comparison',
+    type: 'Article',
+    datePublished: '2026-04-01',
+  });
 </script>
 
 <template>
@@ -1077,18 +1113,19 @@ usePageGeo({
 
     <h2>Cloudflare Pages — best cold-start latency under load</h2>
     <p>
-      Cloudflare Pages serves Nuxt 4 apps from <strong>300+ edge locations</strong>
-      with median cold starts of <strong>~50ms</strong> measured across 1,000
-      synthetic invocations. The free tier includes <strong>100,000 daily
-      requests</strong> and unmetered bandwidth.
+      Cloudflare Pages serves Nuxt 4 apps from
+      <strong>300+ edge locations</strong> with median cold starts of
+      <strong>~50ms</strong> measured across 1,000 synthetic invocations. The
+      free tier includes <strong>100,000 daily requests</strong> and unmetered
+      bandwidth.
     </p>
 
     <h2>Vercel — best DX, tightest Nuxt integration</h2>
     <p>
       Vercel ships first-party Nuxt presets and is co-maintained with the Nuxt
       core team. Cold starts average <strong>~120ms</strong> on the Edge
-      Runtime; the Hobby tier covers <strong>100GB-h serverless function
-      execution</strong> per month.
+      Runtime; the Hobby tier covers
+      <strong>100GB-h serverless function execution</strong> per month.
     </p>
   </article>
 </template>
@@ -1098,21 +1135,21 @@ usePageGeo({
 
 Classic SEO obsessed over keyword density (1-3%). GEO rewards different signals:
 
-| Old (SEO) | New (GEO) |
-|-----------|-----------|
-| Repeat target keyword 10-15 times | Mention each entity **once**, use synonyms naturally |
-| Long-tail keyword variants in headings | Descriptive declarative headings (see `content-self-contained-chunks`) |
+| Old (SEO)                                             | New (GEO)                                                                       |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Repeat target keyword 10-15 times                     | Mention each entity **once**, use synonyms naturally                            |
+| Long-tail keyword variants in headings                | Descriptive declarative headings (see `content-self-contained-chunks`)          |
 | Keyword in alt text, URL, meta description, H1, H2... | Entity in JSON-LD `Organization` / `Product` (see `entity-organization-schema`) |
-| Latent Semantic Indexing (LSI) keyword stuffing | Statistics + citations + quotations (the +40% trio) |
+| Latent Semantic Indexing (LSI) keyword stuffing       | Statistics + citations + quotations (the +40% trio)                             |
 
 ### Lexical variety is good — keyword obsession is bad
 
 LLMs reward varied phrasing because it shows the content addresses the topic from multiple angles. Use synonyms:
 
-| Stuffed | Varied (GEO-friendly) |
-|---------|----------------------|
+| Stuffed             | Varied (GEO-friendly)                                                                                       |
+| ------------------- | ----------------------------------------------------------------------------------------------------------- |
 | "Nuxt hosting" × 14 | "deploying Nuxt", "Nuxt deployment targets", "where to host a Nuxt 4 app", "production Nuxt infrastructure" |
-| "best CRM" × 10 | "leading CRM platforms", "CRM tools for B2B sales", "customer relationship management software" |
+| "best CRM" × 10     | "leading CRM platforms", "CRM tools for B2B sales", "customer relationship management software"             |
 
 ### Verification — count keyword density
 
@@ -1199,41 +1236,41 @@ Renders a semantic `<blockquote>` with `cite` attributes and emits Schema.org `Q
 ```vue
 <!-- app/components/Geo/Quote.vue -->
 <script setup lang="ts">
-const props = defineProps<{
-  author: string;
-  authorRole?: string;
-  authorUrl?: string;
-  source: string;
-  sourceUrl?: string;
-  date?: string; // ISO 8601
-}>();
+  const props = defineProps<{
+    author: string;
+    authorRole?: string;
+    authorUrl?: string;
+    source: string;
+    sourceUrl?: string;
+    date?: string; // ISO 8601
+  }>();
 
-const slots = useSlots();
-const quoteText = computed(() => {
-  const node = slots.default?.()?.[0];
-  return typeof node?.children === 'string' ? node.children.trim() : '';
-});
+  const slots = useSlots();
+  const quoteText = computed(() => {
+    const node = slots.default?.()?.[0];
+    return typeof node?.children === 'string' ? node.children.trim() : '';
+  });
 
-useHead({
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Quotation',
-        text: quoteText.value,
-        spokenByCharacter: {
-          '@type': 'Person',
-          name: props.author,
-          jobTitle: props.authorRole,
-          url: props.authorUrl,
-        },
-        citation: props.sourceUrl,
-        dateCreated: props.date,
-      }),
-    },
-  ],
-});
+  useHead({
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Quotation',
+          text: quoteText.value,
+          spokenByCharacter: {
+            '@type': 'Person',
+            name: props.author,
+            jobTitle: props.authorRole,
+            url: props.authorUrl,
+          },
+          citation: props.sourceUrl,
+          dateCreated: props.date,
+        }),
+      },
+    ],
+  });
 </script>
 
 <template>
@@ -1243,13 +1280,17 @@ useHead({
     </blockquote>
     <figcaption>
       —
-      <a v-if="authorUrl" :href="authorUrl" rel="noopener external">{{ author }}</a>
+      <a v-if="authorUrl" :href="authorUrl" rel="noopener external">{{
+        author
+      }}</a>
       <span v-else>{{ author }}</span>
       <span v-if="authorRole">, {{ authorRole }}</span>
       <span v-if="source">
         ·
         <cite>
-          <a v-if="sourceUrl" :href="sourceUrl" rel="noopener external">{{ source }}</a>
+          <a v-if="sourceUrl" :href="sourceUrl" rel="noopener external">{{
+            source
+          }}</a>
           <template v-else>{{ source }}</template>
         </cite>
       </span>
@@ -1261,12 +1302,12 @@ useHead({
 
 ### Best-practice quotation patterns for GEO
 
-| Pattern | Effect on AI citation |
-|---------|----------------------|
-| Named person + role + date + source | **Highest** — fully attributable, reproducible |
-| Named person + source (no date) | High — but stale-content risk |
-| Anonymous "industry expert" / "many believe" | **Zero** — paraphrase tier, ignored |
-| Internal team member (verifiable on `sameAs`) | High — pairs well with `entity-author-schema` |
+| Pattern                                       | Effect on AI citation                          |
+| --------------------------------------------- | ---------------------------------------------- |
+| Named person + role + date + source           | **Highest** — fully attributable, reproducible |
+| Named person + source (no date)               | High — but stale-content risk                  |
+| Anonymous "industry expert" / "many believe"  | **Zero** — paraphrase tier, ignored            |
+| Internal team member (verifiable on `sameAs`) | High — pairs well with `entity-author-schema`  |
 
 ### Where to source quotations
 
@@ -1283,7 +1324,10 @@ useHead({
 useSchemaOrg([
   defineQuotation({
     text: 'Most Nuxt apps will run on the edge by default within 18 months.',
-    spokenByCharacter: definePerson({ name: 'Daniel Roe', url: 'https://roe.dev' }),
+    spokenByCharacter: definePerson({
+      name: 'Daniel Roe',
+      url: 'https://roe.dev',
+    }),
     citation: 'https://viteconf.org/2025',
     dateCreated: '2025-10-09',
   }),
@@ -1347,11 +1391,11 @@ This means a paragraph that depends on context above it ("As mentioned earlier..
 
     <h2>Neon — best for serverless Postgres with branching</h2>
     <p>
-      Neon is a serverless Postgres provider with database branching, which
-      lets each Git branch in your Nuxt app get its own isolated DB copy. Cold
-      start is ~300ms; sustained queries match traditional Postgres. Neon is
-      the best choice when you need full Postgres features (extensions, JSON,
-      PostGIS) and a Git-style workflow for schema changes.
+      Neon is a serverless Postgres provider with database branching, which lets
+      each Git branch in your Nuxt app get its own isolated DB copy. Cold start
+      is ~300ms; sustained queries match traditional Postgres. Neon is the best
+      choice when you need full Postgres features (extensions, JSON, PostGIS)
+      and a Git-style workflow for schema changes.
     </p>
 
     <h2>Turso — best for global multi-region SQLite replication</h2>
@@ -1378,21 +1422,21 @@ If no → rewrite to:
 
 ### Front-load the answer (inverted pyramid)
 
-| Position in section | What to put | Why |
-|---------------------|-------------|-----|
-| First sentence of `<h2>` block | The direct answer | Highest retrieval probability |
-| Second sentence | Supporting statistic | Pairs with `content-statistics` |
-| Third sentence onward | Nuance, edge cases, alternatives | Read by humans, often dropped by LLMs |
+| Position in section            | What to put                      | Why                                   |
+| ------------------------------ | -------------------------------- | ------------------------------------- |
+| First sentence of `<h2>` block | The direct answer                | Highest retrieval probability         |
+| Second sentence                | Supporting statistic             | Pairs with `content-statistics`       |
+| Third sentence onward          | Nuance, edge cases, alternatives | Read by humans, often dropped by LLMs |
 
 ### Heading hierarchy matters
 
 LLMs use heading text as a strong signal of which chunk is "about" what. Make headings **descriptive declaratives**, not teasers:
 
-| Heading style | GEO friendly? |
-|---------------|---------------|
-| `## Cloudflare D1 — best for edge-first apps under 10GB` | Yes — entity + verdict |
-| `## Why we picked D1` | No — pronoun, no entity |
-| `## A surprising choice` | No — clickbait, no information |
+| Heading style                                            | GEO friendly?                  |
+| -------------------------------------------------------- | ------------------------------ |
+| `## Cloudflare D1 — best for edge-first apps under 10GB` | Yes — entity + verdict         |
+| `## Why we picked D1`                                    | No — pronoun, no entity        |
+| `## A surprising choice`                                 | No — clickbait, no information |
 
 ### Use semantic HTML, not just `<div>`
 
@@ -1445,11 +1489,11 @@ LLMs preferentially extract specific, quotable numerical claims because they red
 ```vue
 <!-- ❌ WRONG — vague, not extractable, no numbers AI can lift -->
 <script setup lang="ts">
-usePageGeo({
-  title: 'Why Nuxt is Fast',
-  description: 'Nuxt is one of the fastest frameworks.',
-  path: '/blog/nuxt-performance',
-})
+  usePageGeo({
+    title: 'Why Nuxt is Fast',
+    description: 'Nuxt is one of the fastest frameworks.',
+    path: '/blog/nuxt-performance',
+  });
 </script>
 
 <template>
@@ -1469,13 +1513,14 @@ usePageGeo({
 ```vue
 <!-- ✅ CORRECT — every claim has a number an LLM can extract and cite -->
 <script setup lang="ts">
-usePageGeo({
-  title: 'Why Nuxt is Fast',
-  description: 'Nuxt 4 ships ~30% smaller hydration payloads and 3-5x faster cold starts on Cloudflare Workers compared to Nuxt 3.',
-  path: '/blog/nuxt-performance',
-  type: 'Article',
-  datePublished: '2026-04-01',
-})
+  usePageGeo({
+    title: 'Why Nuxt is Fast',
+    description:
+      'Nuxt 4 ships ~30% smaller hydration payloads and 3-5x faster cold starts on Cloudflare Workers compared to Nuxt 3.',
+    path: '/blog/nuxt-performance',
+    type: 'Article',
+    datePublished: '2026-04-01',
+  });
 </script>
 
 <template>
@@ -1484,8 +1529,9 @@ usePageGeo({
     <p>
       Nuxt 4 ships <strong>~30% smaller hydration payloads</strong> than Nuxt 3
       thanks to selective hydration. On Cloudflare Workers, cold starts dropped
-      from <strong>~250ms (Nuxt 3.10)</strong> to <strong>~50-80ms (Nuxt 4.0)</strong>
-      — a <strong>3-5x improvement</strong> measured across 1,000 cold invocations.
+      from <strong>~250ms (Nuxt 3.10)</strong> to
+      <strong>~50-80ms (Nuxt 4.0)</strong> — a
+      <strong>3-5x improvement</strong> measured across 1,000 cold invocations.
     </p>
     <p>
       Build times improved by <strong>40-60%</strong> for medium-sized apps
@@ -1502,12 +1548,12 @@ Make statistics first-class in your design system so authors stop writing fluff:
 ```vue
 <!-- app/components/Geo/Stat.vue -->
 <script setup lang="ts">
-defineProps<{
-  value: string;       // e.g. "40%", "3.5x", "$2.1B"
-  label: string;       // e.g. "visibility lift"
-  source?: string;     // e.g. "arXiv:2311.09735"
-  sourceUrl?: string;
-}>();
+  defineProps<{
+    value: string; // e.g. "40%", "3.5x", "$2.1B"
+    label: string; // e.g. "visibility lift"
+    source?: string; // e.g. "arXiv:2311.09735"
+    sourceUrl?: string;
+  }>();
 </script>
 
 <template>
@@ -1515,7 +1561,9 @@ defineProps<{
     <strong itemprop="value">{{ value }}</strong>
     <figcaption itemprop="description">
       {{ label }}
-      <a v-if="sourceUrl" :href="sourceUrl" itemprop="citation">— {{ source }}</a>
+      <a v-if="sourceUrl" :href="sourceUrl" itemprop="citation"
+        >— {{ source }}</a
+      >
     </figcaption>
   </figure>
 </template>
@@ -1533,12 +1581,12 @@ defineProps<{
 
 ### What counts as a "statistic" for GEO
 
-| Good | Bad |
-|------|-----|
-| `~40%`, `3.5x`, `$2.1B`, `127ms` | "significantly", "a lot", "many" |
-| `7 of 10 developers` | "most developers" |
-| `Released 2024-11-15` | "recently released" |
-| `Reduced bundle size by 312KB (gzip)` | "smaller bundle" |
+| Good                                  | Bad                              |
+| ------------------------------------- | -------------------------------- |
+| `~40%`, `3.5x`, `$2.1B`, `127ms`      | "significantly", "a lot", "many" |
+| `7 of 10 developers`                  | "most developers"                |
+| `Released 2024-11-15`                 | "recently released"              |
+| `Reduced bundle size by 312KB (gzip)` | "smaller bundle"                 |
 
 ### Verification checklist
 
@@ -1579,64 +1627,66 @@ Adding `Person` JSON-LD with `sameAs` cross-references (LinkedIn, Twitter/X, Git
 ```vue
 <!-- ✅ CORRECT — full author entity with credentials and sameAs -->
 <script setup lang="ts">
-const post = {
-  title: 'How to Mitigate XSS in Nuxt 4',
-  description: 'Practical guide to preventing cross-site scripting in Nuxt 4 apps using CSP, sanitization, and Vue\'s built-in defenses.',
-  datePublished: '2026-04-01T10:00:00Z',
-  dateModified: '2026-04-15T14:30:00Z',
-  url: 'https://example.com/blog/xss-in-nuxt-4',
-};
+  const post = {
+    title: 'How to Mitigate XSS in Nuxt 4',
+    description:
+      "Practical guide to preventing cross-site scripting in Nuxt 4 apps using CSP, sanitization, and Vue's built-in defenses.",
+    datePublished: '2026-04-01T10:00:00Z',
+    dateModified: '2026-04-15T14:30:00Z',
+    url: 'https://example.com/blog/xss-in-nuxt-4',
+  };
 
-const author = {
-  name: 'Jane Doe',
-  jobTitle: 'Principal Security Engineer',
-  worksFor: 'My App, Inc.',
-  url: 'https://janedoe.dev',
-  description: 'Web security engineer with 12 years at Cloudflare and Google. Author of "Practical Web Security" (O\'Reilly, 2024).',
-  sameAs: [
-    'https://www.linkedin.com/in/janedoe',
-    'https://twitter.com/janedoe',
-    'https://github.com/janedoe',
-    'https://scholar.google.com/citations?user=ABC123',
-    'https://orcid.org/0000-0002-1825-0097',
-    'https://www.oreilly.com/people/jane-doe/',
-  ],
-  knowsAbout: [
-    'Web security',
-    'Cross-site scripting (XSS)',
-    'Content Security Policy',
-    'Cloudflare Workers security',
-    'Vue.js',
-    'Nuxt',
-  ],
-};
+  const author = {
+    name: 'Jane Doe',
+    jobTitle: 'Principal Security Engineer',
+    worksFor: 'My App, Inc.',
+    url: 'https://janedoe.dev',
+    description:
+      'Web security engineer with 12 years at Cloudflare and Google. Author of "Practical Web Security" (O\'Reilly, 2024).',
+    sameAs: [
+      'https://www.linkedin.com/in/janedoe',
+      'https://twitter.com/janedoe',
+      'https://github.com/janedoe',
+      'https://scholar.google.com/citations?user=ABC123',
+      'https://orcid.org/0000-0002-1825-0097',
+      'https://www.oreilly.com/people/jane-doe/',
+    ],
+    knowsAbout: [
+      'Web security',
+      'Cross-site scripting (XSS)',
+      'Content Security Policy',
+      'Cloudflare Workers security',
+      'Vue.js',
+      'Nuxt',
+    ],
+  };
 
-useHead({
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Article',
-        headline: post.title,
-        description: post.description,
-        datePublished: post.datePublished,
-        dateModified: post.dateModified,
-        url: post.url,
-        mainEntityOfPage: post.url,
-        author: {
-          '@type': 'Person',
-          '@id': `${author.url}#person`,
-          ...author,
-        },
-        publisher: {
-          '@type': 'Organization',
-          '@id': 'https://example.com/#organization',
-        },
-      }),
-    },
-  ],
-});
+  useHead({
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: post.title,
+          description: post.description,
+          datePublished: post.datePublished,
+          dateModified: post.dateModified,
+          url: post.url,
+          mainEntityOfPage: post.url,
+          author: {
+            '@type': 'Person',
+            '@id': `${author.url}#person`,
+            ...author,
+          },
+          publisher: {
+            '@type': 'Organization',
+            '@id': 'https://example.com/#organization',
+          },
+        }),
+      },
+    ],
+  });
 </script>
 
 <template>
@@ -1644,8 +1694,8 @@ useHead({
     <h1>{{ post.title }}</h1>
     <p class="byline">
       By
-      <a :href="author.url" rel="author">{{ author.name }}</a>,
-      {{ author.jobTitle }} at {{ author.worksFor }}
+      <a :href="author.url" rel="author">{{ author.name }}</a
+      >, {{ author.jobTitle }} at {{ author.worksFor }}
       ·
       <time :datetime="post.datePublished">
         Published {{ new Date(post.datePublished).toLocaleDateString() }}
@@ -1666,21 +1716,21 @@ useHead({
 
 ```vue
 <script setup lang="ts">
-useSchemaOrg([
-  defineArticle({
-    headline: post.title,
-    description: post.description,
-    datePublished: post.datePublished,
-    dateModified: post.dateModified,
-    author: definePerson({
-      name: author.name,
-      jobTitle: author.jobTitle,
-      url: author.url,
-      sameAs: author.sameAs,
-      knowsAbout: author.knowsAbout,
+  useSchemaOrg([
+    defineArticle({
+      headline: post.title,
+      description: post.description,
+      datePublished: post.datePublished,
+      dateModified: post.dateModified,
+      author: definePerson({
+        name: author.name,
+        jobTitle: author.jobTitle,
+        url: author.url,
+        sameAs: author.sameAs,
+        knowsAbout: author.knowsAbout,
+      }),
     }),
-  }),
-]);
+  ]);
 </script>
 ```
 
@@ -1691,23 +1741,23 @@ Each author should have a dedicated `/about/jane-doe` page that **also** emits t
 ```vue
 <!-- pages/about/[author].vue -->
 <script setup lang="ts">
-const route = useRoute();
-const author = await fetchAuthor(route.params.author as string);
+  const route = useRoute();
+  const author = await fetchAuthor(route.params.author as string);
 
-useSchemaOrg([
-  definePerson({
-    '@id': `https://example.com/about/${author.slug}#person`,
-    name: author.name,
-    jobTitle: author.jobTitle,
-    url: `https://example.com/about/${author.slug}`,
-    image: author.headshot,
-    description: author.bio,
-    sameAs: author.sameAs,
-    knowsAbout: author.expertiseAreas,
-    alumniOf: author.education,
-    award: author.awards,
-  }),
-]);
+  useSchemaOrg([
+    definePerson({
+      '@id': `https://example.com/about/${author.slug}#person`,
+      name: author.name,
+      jobTitle: author.jobTitle,
+      url: `https://example.com/about/${author.slug}`,
+      image: author.headshot,
+      description: author.bio,
+      sameAs: author.sameAs,
+      knowsAbout: author.expertiseAreas,
+      alumniOf: author.education,
+      award: author.awards,
+    }),
+  ]);
 </script>
 ```
 
@@ -1715,11 +1765,11 @@ useSchemaOrg([
 
 This is the LLM's strongest topical authority signal for an author. Be specific:
 
-| Vague (low GEO value) | Specific (high GEO value) |
-|----------------------|---------------------------|
-| "Programming" | "Vue.js", "Nuxt 4", "TypeScript", "Vite plugin development" |
-| "Marketing" | "B2B SaaS positioning", "PLG conversion optimization", "developer relations" |
-| "AI" | "Retrieval-augmented generation", "transformer architecture", "LLM fine-tuning" |
+| Vague (low GEO value) | Specific (high GEO value)                                                       |
+| --------------------- | ------------------------------------------------------------------------------- |
+| "Programming"         | "Vue.js", "Nuxt 4", "TypeScript", "Vite plugin development"                     |
+| "Marketing"           | "B2B SaaS positioning", "PLG conversion optimization", "developer relations"    |
+| "AI"                  | "Retrieval-augmented generation", "transformer architecture", "LLM fine-tuning" |
 
 ### YMYL extra requirements
 
@@ -1768,7 +1818,7 @@ Reference: [Schema.org `Person`](https://schema.org/Person) · [Google E-E-A-T](
 
 ## FAQPage and HowTo Schemas for the Question-Shaped Queries LLMs Love
 
-Most AI search queries are question-shaped: *"how do I X"*, *"what's the best Y for Z"*, *"why does X happen"*. Two Schema.org types — **FAQPage** and **HowTo** — map directly onto this pattern. Pages with these schemas are disproportionately cited in AI Overviews, AI Mode, and Perplexity because the structured Q&A format matches the answer the LLM is trying to assemble.
+Most AI search queries are question-shaped: _"how do I X"_, _"what's the best Y for Z"_, _"why does X happen"_. Two Schema.org types — **FAQPage** and **HowTo** — map directly onto this pattern. Pages with these schemas are disproportionately cited in AI Overviews, AI Mode, and Perplexity because the structured Q&A format matches the answer the LLM is trying to assemble.
 
 **Incorrect (FAQ rendered as plain text only):**
 
@@ -1778,10 +1828,15 @@ Most AI search queries are question-shaped: *"how do I X"*, *"what's the best Y 
   <section>
     <h2>Frequently Asked Questions</h2>
     <h3>How do I deploy a Nuxt 4 app to Cloudflare Workers?</h3>
-    <p>Run nuxi build with the cloudflare-pages preset, then wrangler deploy.</p>
+    <p>
+      Run nuxi build with the cloudflare-pages preset, then wrangler deploy.
+    </p>
 
     <h3>Does Nuxt 4 work with Cloudflare D1?</h3>
-    <p>Yes — use the @cloudflare/workers-types adapter and bind D1 in wrangler.toml.</p>
+    <p>
+      Yes — use the @cloudflare/workers-types adapter and bind D1 in
+      wrangler.toml.
+    </p>
   </section>
 </template>
 ```
@@ -1791,36 +1846,36 @@ Most AI search queries are question-shaped: *"how do I X"*, *"what's the best Y 
 ```vue
 <!-- ✅ CORRECT — same content, plus JSON-LD that LLMs ingest as Q&A pairs -->
 <script setup lang="ts">
-const faqs = [
-  {
-    q: 'How do I deploy a Nuxt 4 app to Cloudflare Workers?',
-    a: 'Set the Nitro preset to cloudflare-pages, run `nuxi build`, then `wrangler deploy`. The build output in `.output/public` is served as static assets, while `.output/server` runs as the Worker. Cold start averages ~50ms.',
-  },
-  {
-    q: 'Does Nuxt 4 work with Cloudflare D1?',
-    a: 'Yes — use the @cloudflare/workers-types package, bind your D1 database in wrangler.toml, and access it via `event.context.cloudflare.env.DB` inside Nitro server routes. Drizzle ORM is the recommended query layer.',
-  },
-];
-
-useHead({
-  script: [
+  const faqs = [
     {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: faqs.map((f) => ({
-          '@type': 'Question',
-          name: f.q,
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: f.a,
-          },
-        })),
-      }),
+      q: 'How do I deploy a Nuxt 4 app to Cloudflare Workers?',
+      a: 'Set the Nitro preset to cloudflare-pages, run `nuxi build`, then `wrangler deploy`. The build output in `.output/public` is served as static assets, while `.output/server` runs as the Worker. Cold start averages ~50ms.',
     },
-  ],
-});
+    {
+      q: 'Does Nuxt 4 work with Cloudflare D1?',
+      a: 'Yes — use the @cloudflare/workers-types package, bind your D1 database in wrangler.toml, and access it via `event.context.cloudflare.env.DB` inside Nitro server routes. Drizzle ORM is the recommended query layer.',
+    },
+  ];
+
+  useHead({
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: faqs.map((f) => ({
+            '@type': 'Question',
+            name: f.q,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: f.a,
+            },
+          })),
+        }),
+      },
+    ],
+  });
 </script>
 
 <template>
@@ -1838,14 +1893,14 @@ useHead({
 
 ```vue
 <script setup lang="ts">
-useSchemaOrg([
-  defineFaqPage({
-    mainEntity: faqs.map((f) => ({
-      name: f.q,
-      acceptedAnswer: f.a,
-    })),
-  }),
-]);
+  useSchemaOrg([
+    defineFaqPage({
+      mainEntity: faqs.map((f) => ({
+        name: f.q,
+        acceptedAnswer: f.a,
+      })),
+    }),
+  ]);
 </script>
 ```
 
@@ -1853,43 +1908,44 @@ useSchemaOrg([
 
 ```vue
 <script setup lang="ts">
-useSchemaOrg([
-  defineHowTo({
-    name: 'Deploy a Nuxt 4 App to Cloudflare Workers in 5 Minutes',
-    description: 'Step-by-step guide from a fresh Nuxt 4 project to a live Cloudflare Workers deployment with custom domain.',
-    totalTime: 'PT5M', // ISO 8601 duration
-    estimatedCost: { currency: 'USD', value: '0' },
-    supply: ['Cloudflare account', 'Node.js 20+', 'Bun or pnpm'],
-    tool: ['Wrangler CLI', 'Nuxi CLI'],
-    step: [
-      {
-        name: 'Set the Nitro preset',
-        text: 'In nuxt.config.ts, set nitro.preset to "cloudflare-pages" and pin a compatibilityDate.',
-        url: '#step-1',
-      },
-      {
-        name: 'Build the production bundle',
-        text: 'Run `nuxi build`. Output appears in .output/public (static) and .output/server (Worker code).',
-        url: '#step-2',
-      },
-      {
-        name: 'Configure wrangler.toml',
-        text: 'Create wrangler.toml with name, compatibility_date, and pages_build_output_dir = ".output/public".',
-        url: '#step-3',
-      },
-      {
-        name: 'Deploy with wrangler',
-        text: 'Run `wrangler pages deploy .output/public`. First deploy takes ~30s; subsequent ones ~10s.',
-        url: '#step-4',
-      },
-      {
-        name: 'Bind a custom domain',
-        text: 'In Cloudflare Dashboard → Pages → your project → Custom Domains, add your domain. DNS propagates in ~60s.',
-        url: '#step-5',
-      },
-    ],
-  }),
-]);
+  useSchemaOrg([
+    defineHowTo({
+      name: 'Deploy a Nuxt 4 App to Cloudflare Workers in 5 Minutes',
+      description:
+        'Step-by-step guide from a fresh Nuxt 4 project to a live Cloudflare Workers deployment with custom domain.',
+      totalTime: 'PT5M', // ISO 8601 duration
+      estimatedCost: { currency: 'USD', value: '0' },
+      supply: ['Cloudflare account', 'Node.js 20+', 'pnpm'],
+      tool: ['Wrangler CLI', 'Nuxi CLI'],
+      step: [
+        {
+          name: 'Set the Nitro preset',
+          text: 'In nuxt.config.ts, set nitro.preset to "cloudflare-pages" and pin a compatibilityDate.',
+          url: '#step-1',
+        },
+        {
+          name: 'Build the production bundle',
+          text: 'Run `nuxi build`. Output appears in .output/public (static) and .output/server (Worker code).',
+          url: '#step-2',
+        },
+        {
+          name: 'Configure wrangler.toml',
+          text: 'Create wrangler.toml with name, compatibility_date, and pages_build_output_dir = ".output/public".',
+          url: '#step-3',
+        },
+        {
+          name: 'Deploy with wrangler',
+          text: 'Run `wrangler pages deploy .output/public`. First deploy takes ~30s; subsequent ones ~10s.',
+          url: '#step-4',
+        },
+        {
+          name: 'Bind a custom domain',
+          text: 'In Cloudflare Dashboard → Pages → your project → Custom Domains, add your domain. DNS propagates in ~60s.',
+          url: '#step-5',
+        },
+      ],
+    }),
+  ]);
 </script>
 ```
 
@@ -1926,10 +1982,13 @@ export function useFaq(faqs: { q: string; a: string }[]) {
 ```vue
 <!-- pages/pricing.vue -->
 <script setup lang="ts">
-const { faqs } = useFaq([
-  { q: 'Is there a free tier?', a: 'Yes. Up to 10,000 events/month forever.' },
-  { q: 'Can I self-host?', a: 'Yes — Docker image at ghcr.io/myapp/myapp.' },
-]);
+  const { faqs } = useFaq([
+    {
+      q: 'Is there a free tier?',
+      a: 'Yes. Up to 10,000 events/month forever.',
+    },
+    { q: 'Can I self-host?', a: 'Yes — Docker image at ghcr.io/myapp/myapp.' },
+  ]);
 </script>
 ```
 
@@ -1965,15 +2024,15 @@ Reference: [Schema.org `FAQPage`](https://schema.org/FAQPage) · [Schema.org `Ho
 
 Generative engines build an entity model of your brand by cross-referencing signals from multiple sources (your site, LinkedIn, Crunchbase, Wikipedia, GitHub, Twitter/X). The `sameAs` property in your `Organization` JSON-LD is the explicit link that tells the LLM "these accounts all refer to the same entity." Without it, the model has to guess — and may merge or split your identity unpredictably.
 
-The Search Engine Land GEO playbook calls this out directly: *"When these signals are consistent across sources, AI systems can categorize and reference your brand with greater confidence. When they conflict, confidence drops, and your brand is less likely to be mentioned."*
+The Search Engine Land GEO playbook calls this out directly: _"When these signals are consistent across sources, AI systems can categorize and reference your brand with greater confidence. When they conflict, confidence drops, and your brand is less likely to be mentioned."_
 
 **Incorrect (no Organization schema):**
 
 ```vue
 <!-- ❌ WRONG — app.vue with no entity schema -->
 <script setup lang="ts">
-// Search engines have no canonical entity definition for your brand
-// AI systems may confuse "monday" the SaaS with the day of the week
+  // Search engines have no canonical entity definition for your brand
+  // AI systems may confuse "monday" the SaaS with the day of the week
 </script>
 ```
 
@@ -1982,52 +2041,53 @@ The Search Engine Land GEO playbook calls this out directly: *"When these signal
 ```vue
 <!-- ✅ CORRECT — app.vue or default layout — site-wide Organization entity -->
 <script setup lang="ts">
-const config = useRuntimeConfig();
-const baseUrl = config.public.baseUrl || 'https://example.com';
+  const config = useRuntimeConfig();
+  const baseUrl = config.public.baseUrl || 'https://example.com';
 
-useHead({
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Organization',
-        '@id': `${baseUrl}/#organization`,
-        name: 'My App',
-        legalName: 'My App, Inc.',
-        url: baseUrl,
-        logo: `${baseUrl}/logo-512.png`,
-        description: 'My App helps Nuxt developers ship faster by automating X for B2B SaaS teams.',
-        foundingDate: '2024-01-15',
-        founders: [
-          { '@type': 'Person', name: 'Jane Doe', url: 'https://janedoe.dev' },
-        ],
-        // Cross-references — the magic GEO ingredient
-        sameAs: [
-          'https://www.linkedin.com/company/my-app',
-          'https://twitter.com/myapp',
-          'https://x.com/myapp',
-          'https://github.com/my-app',
-          'https://www.crunchbase.com/organization/my-app',
-          'https://www.wikipedia.org/wiki/My_App',
-          'https://www.youtube.com/@myapp',
-        ],
-        contactPoint: {
-          '@type': 'ContactPoint',
-          contactType: 'customer support',
-          email: 'support@example.com',
-          availableLanguage: ['en'],
-        },
-        address: {
-          '@type': 'PostalAddress',
-          addressLocality: 'San Francisco',
-          addressRegion: 'CA',
-          addressCountry: 'US',
-        },
-      }),
-    },
-  ],
-});
+  useHead({
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Organization',
+          '@id': `${baseUrl}/#organization`,
+          name: 'My App',
+          legalName: 'My App, Inc.',
+          url: baseUrl,
+          logo: `${baseUrl}/logo-512.png`,
+          description:
+            'My App helps Nuxt developers ship faster by automating X for B2B SaaS teams.',
+          foundingDate: '2024-01-15',
+          founders: [
+            { '@type': 'Person', name: 'Jane Doe', url: 'https://janedoe.dev' },
+          ],
+          // Cross-references — the magic GEO ingredient
+          sameAs: [
+            'https://www.linkedin.com/company/my-app',
+            'https://twitter.com/myapp',
+            'https://x.com/myapp',
+            'https://github.com/my-app',
+            'https://www.crunchbase.com/organization/my-app',
+            'https://www.wikipedia.org/wiki/My_App',
+            'https://www.youtube.com/@myapp',
+          ],
+          contactPoint: {
+            '@type': 'ContactPoint',
+            contactType: 'customer support',
+            email: 'support@example.com',
+            availableLanguage: ['en'],
+          },
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'San Francisco',
+            addressRegion: 'CA',
+            addressCountry: 'US',
+          },
+        }),
+      },
+    ],
+  });
 </script>
 ```
 
@@ -2054,26 +2114,27 @@ export default defineNuxtConfig({
 ```vue
 <!-- app.vue — typed, auto-cross-referenced -->
 <script setup lang="ts">
-useSchemaOrg([
-  defineOrganization({
-    name: 'My App',
-    legalName: 'My App, Inc.',
-    logo: '/logo-512.png',
-    description: 'My App helps Nuxt developers ship faster by automating X for B2B SaaS teams.',
-    foundingDate: '2024-01-15',
-    sameAs: [
-      'https://www.linkedin.com/company/my-app',
-      'https://twitter.com/myapp',
-      'https://github.com/my-app',
-      'https://www.crunchbase.com/organization/my-app',
-    ],
-  }),
-  defineWebSite({
-    name: 'My App',
-    inLanguage: 'en-US',
-  }),
-  defineWebPage(), // auto-attached to the current route
-]);
+  useSchemaOrg([
+    defineOrganization({
+      name: 'My App',
+      legalName: 'My App, Inc.',
+      logo: '/logo-512.png',
+      description:
+        'My App helps Nuxt developers ship faster by automating X for B2B SaaS teams.',
+      foundingDate: '2024-01-15',
+      sameAs: [
+        'https://www.linkedin.com/company/my-app',
+        'https://twitter.com/myapp',
+        'https://github.com/my-app',
+        'https://www.crunchbase.com/organization/my-app',
+      ],
+    }),
+    defineWebSite({
+      name: 'My App',
+      inLanguage: 'en-US',
+    }),
+    defineWebPage(), // auto-attached to the current route
+  ]);
 </script>
 ```
 
@@ -2081,12 +2142,12 @@ useSchemaOrg([
 
 Aim for 5+ high-quality cross-references. Quality > quantity.
 
-| Tier | Examples |
-|------|----------|
-| **Must-have** | LinkedIn company page, X/Twitter, GitHub org (if dev tool) |
-| **Strong** | Crunchbase, Wikipedia, official YouTube channel |
-| **Good** | Product Hunt, AngelList, G2, Capterra (verified profiles only) |
-| **Skip** | Personal social accounts, defunct profiles, unverified directories |
+| Tier          | Examples                                                           |
+| ------------- | ------------------------------------------------------------------ |
+| **Must-have** | LinkedIn company page, X/Twitter, GitHub org (if dev tool)         |
+| **Strong**    | Crunchbase, Wikipedia, official YouTube channel                    |
+| **Good**      | Product Hunt, AngelList, G2, Capterra (verified profiles only)     |
+| **Skip**      | Personal social accounts, defunct profiles, unverified directories |
 
 **Critical:** every `sameAs` URL must be **two-way verifiable** — the LinkedIn page should link back to your domain, the GitHub org should have your domain in the website field, etc. AI systems penalize one-way claims.
 
@@ -2097,7 +2158,8 @@ If your brand shares a name with anything common (e.g., "Apple", "Monday", "Noti
 ```ts
 defineOrganization({
   name: 'Linear',
-  description: 'Linear is a project management software company for engineering teams. Not to be confused with linear algebra or Linear A script.',
+  description:
+    'Linear is a project management software company for engineering teams. Not to be confused with linear algebra or Linear A script.',
   // ...
 });
 ```
@@ -2167,11 +2229,11 @@ If your content is genuinely fresh but doesn't expose these, the LLM treats it a
 ```vue
 <!-- ❌ WRONG — page may be updated weekly, but AI sees no signal -->
 <script setup lang="ts">
-useSeoMeta({
-  title: 'Best Vector Databases for RAG in 2026',
-  description: 'Updated comparison of vector DBs.',
-});
-// No JSON-LD, no dateModified, no canonical
+  useSeoMeta({
+    title: 'Best Vector Databases for RAG in 2026',
+    description: 'Updated comparison of vector DBs.',
+  });
+  // No JSON-LD, no dateModified, no canonical
 </script>
 ```
 
@@ -2180,19 +2242,19 @@ useSeoMeta({
 ```vue
 <!-- ✅ CORRECT — three layers of freshness signal -->
 <script setup lang="ts">
-const post = await useFetch('/api/posts/best-vector-databases-2026').then(
-  (r) => r.data.value,
-);
+  const post = await useFetch('/api/posts/best-vector-databases-2026').then(
+    (r) => r.data.value,
+  );
 
-usePageGeo({
-  title: post.title,
-  description: post.description,
-  path: '/blog/best-vector-databases-2026',
-  type: 'TechArticle',
-  datePublished: post.publishedAt,        // ISO 8601
-  dateModified: post.updatedAt,           // ISO 8601 — updated on every meaningful edit
-  author: post.author,
-});
+  usePageGeo({
+    title: post.title,
+    description: post.description,
+    path: '/blog/best-vector-databases-2026',
+    type: 'TechArticle',
+    datePublished: post.publishedAt, // ISO 8601
+    dateModified: post.updatedAt, // ISO 8601 — updated on every meaningful edit
+    author: post.author,
+  });
 </script>
 
 <template>
@@ -2216,21 +2278,21 @@ usePageGeo({
 
 ### Three layers of freshness — they all matter
 
-| Layer | Where | Audience |
-|-------|-------|----------|
-| 1. JSON-LD `dateModified` | `<script type="application/ld+json">` | LLMs (GPTBot, ClaudeBot, Perplexity) |
-| 2. Visible `<time>` element | Article header | Human users + LLMs that parse text |
-| 3. Sitemap `<lastmod>` | `/sitemap.xml` | Crawler revisit scheduling |
+| Layer                       | Where                                 | Audience                             |
+| --------------------------- | ------------------------------------- | ------------------------------------ |
+| 1. JSON-LD `dateModified`   | `<script type="application/ld+json">` | LLMs (GPTBot, ClaudeBot, Perplexity) |
+| 2. Visible `<time>` element | Article header                        | Human users + LLMs that parse text   |
+| 3. Sitemap `<lastmod>`      | `/sitemap.xml`                        | Crawler revisit scheduling           |
 
 All three should reflect the **same `dateModified`**. Inconsistency confuses the LLM and reduces trust.
 
 ### Update `dateModified` on what counts as a "meaningful edit"
 
-| Edit type | Should bump `dateModified`? |
-|-----------|----------------------------|
-| Fix typo, broken link | Optional (no need to mislead crawlers) |
-| Add new section, update statistics | **Yes** |
-| Republish with significant rewrite | **Yes** — also consider bumping `datePublished` if effectively a new article |
+| Edit type                                               | Should bump `dateModified`?                                                                            |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Fix typo, broken link                                   | Optional (no need to mislead crawlers)                                                                 |
+| Add new section, update statistics                      | **Yes**                                                                                                |
+| Republish with significant rewrite                      | **Yes** — also consider bumping `datePublished` if effectively a new article                           |
 | Auto-rendered `formatDate(new Date())` on every request | **NO** — this is the worst anti-pattern; it makes everything look fake-fresh and the LLM will catch on |
 
 ### Anti-pattern: faking freshness with build-time timestamps
@@ -2238,10 +2300,10 @@ All three should reflect the **same `dateModified`**. Inconsistency confuses the
 ```vue
 <!-- ❌ DO NOT DO THIS -->
 <script setup lang="ts">
-usePageGeo({
-  // ...
-  dateModified: new Date().toISOString(), // every page rebuild "updates" everything
-});
+  usePageGeo({
+    // ...
+    dateModified: new Date().toISOString(), // every page rebuild "updates" everything
+  });
 </script>
 ```
 
@@ -2331,30 +2393,30 @@ This wraps Nuxt's official primitives — [`useSeoMeta`](https://nuxt.com/docs/4
 ```vue
 <!-- ❌ WRONG — duplicated across every page, easy to forget fields -->
 <script setup lang="ts">
-const config = useRuntimeConfig();
-const baseUrl = config.public.baseUrl;
+  const config = useRuntimeConfig();
+  const baseUrl = config.public.baseUrl;
 
-useSeoMeta({
-  title: 'How to Deploy Nuxt to Cloudflare',
-  description: 'Step-by-step guide.',
-  ogTitle: 'How to Deploy Nuxt to Cloudflare',
-  ogUrl: `${baseUrl}/blog/cloudflare-deploy`,
-});
+  useSeoMeta({
+    title: 'How to Deploy Nuxt to Cloudflare',
+    description: 'Step-by-step guide.',
+    ogTitle: 'How to Deploy Nuxt to Cloudflare',
+    ogUrl: `${baseUrl}/blog/cloudflare-deploy`,
+  });
 
-useHead({
-  link: [{ rel: 'canonical', href: `${baseUrl}/blog/cloudflare-deploy` }],
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Article',
-        headline: 'How to Deploy Nuxt to Cloudflare',
-        // ...lots of repetitive JSON-LD per page...
-      }),
-    },
-  ],
-});
+  useHead({
+    link: [{ rel: 'canonical', href: `${baseUrl}/blog/cloudflare-deploy` }],
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: 'How to Deploy Nuxt to Cloudflare',
+          // ...lots of repetitive JSON-LD per page...
+        }),
+      },
+    ],
+  });
 </script>
 ```
 
@@ -2362,7 +2424,14 @@ useHead({
 
 ```ts
 // app/composables/geo/use-page-geo.ts
-type ContentType = 'Article' | 'BlogPosting' | 'NewsArticle' | 'TechArticle' | 'FAQPage' | 'HowTo' | 'WebPage';
+type ContentType =
+  | 'Article'
+  | 'BlogPosting'
+  | 'NewsArticle'
+  | 'TechArticle'
+  | 'FAQPage'
+  | 'HowTo'
+  | 'WebPage';
 
 interface PageGeoOptions {
   /** Page title — used for <title>, og:title, twitter:title, JSON-LD headline */
@@ -2397,7 +2466,8 @@ export function usePageGeo(options: PageGeoOptions) {
 
   const canonicalUrl = `${baseUrl}${options.path}`;
   const type = options.type ?? 'WebPage';
-  const dateModified = options.dateModified ?? options.datePublished ?? new Date().toISOString();
+  const dateModified =
+    options.dateModified ?? options.datePublished ?? new Date().toISOString();
 
   // 1. Canonical link (avoid duplicate-content downranking)
   useHead({
@@ -2486,26 +2556,31 @@ export function usePageGeo(options: PageGeoOptions) {
 ```vue
 <!-- ✅ Usage on a page — one composable call -->
 <script setup lang="ts">
-usePageGeo({
-  title: 'How to Deploy a Nuxt 4 App to Cloudflare Workers in 5 Minutes',
-  description: 'Step-by-step deployment guide. Cold start ~50ms, free tier 100k req/day, custom domain in <60s DNS propagation.',
-  path: '/blog/cloudflare-deploy',
-  type: 'TechArticle',
-  datePublished: '2026-04-01T10:00:00Z',
-  dateModified: '2026-04-15T14:30:00Z',
-  author: {
-    name: 'Jane Doe',
-    url: 'https://janedoe.dev',
-    sameAs: ['https://www.linkedin.com/in/janedoe', 'https://github.com/janedoe'],
-  },
-});
+  usePageGeo({
+    title: 'How to Deploy a Nuxt 4 App to Cloudflare Workers in 5 Minutes',
+    description:
+      'Step-by-step deployment guide. Cold start ~50ms, free tier 100k req/day, custom domain in <60s DNS propagation.',
+    path: '/blog/cloudflare-deploy',
+    type: 'TechArticle',
+    datePublished: '2026-04-01T10:00:00Z',
+    dateModified: '2026-04-15T14:30:00Z',
+    author: {
+      name: 'Jane Doe',
+      url: 'https://janedoe.dev',
+      sameAs: [
+        'https://www.linkedin.com/in/janedoe',
+        'https://github.com/janedoe',
+      ],
+    },
+  });
 
-// Pair with usePageSeo (sibling skill) for OG/Twitter
-usePageSeo({
-  title: 'How to Deploy a Nuxt 4 App to Cloudflare Workers in 5 Minutes',
-  description: 'Step-by-step deployment guide. Cold start ~50ms, free tier 100k req/day.',
-  path: '/blog/cloudflare-deploy',
-});
+  // Pair with usePageSeo (sibling skill) for OG/Twitter
+  usePageSeo({
+    title: 'How to Deploy a Nuxt 4 App to Cloudflare Workers in 5 Minutes',
+    description:
+      'Step-by-step deployment guide. Cold start ~50ms, free tier 100k req/day.',
+    path: '/blog/cloudflare-deploy',
+  });
 </script>
 ```
 
@@ -2576,20 +2651,21 @@ They're complementary — SEO covers social cards and basic meta, GEO covers JSO
 
 ```vue
 <script setup lang="ts">
-const meta = {
-  title: 'Why Edge Rendering Wins in 2026',
-  description: 'Cold start <50ms, $0.50/M requests, automatic global distribution.',
-  path: '/blog/edge-rendering-2026',
-};
+  const meta = {
+    title: 'Why Edge Rendering Wins in 2026',
+    description:
+      'Cold start <50ms, $0.50/M requests, automatic global distribution.',
+    path: '/blog/edge-rendering-2026',
+  };
 
-usePageSeo({ ...meta }); // OG, Twitter, canonical, social images
-usePageGeo({
-  ...meta,
-  type: 'BlogPosting',
-  datePublished: '2026-04-01T10:00:00Z',
-  dateModified: '2026-04-15T14:30:00Z',
-  author: { name: 'Jane Doe', url: 'https://janedoe.dev' },
-}); // JSON-LD entity, freshness, author
+  usePageSeo({ ...meta }); // OG, Twitter, canonical, social images
+  usePageGeo({
+    ...meta,
+    type: 'BlogPosting',
+    datePublished: '2026-04-01T10:00:00Z',
+    dateModified: '2026-04-15T14:30:00Z',
+    author: { name: 'Jane Doe', url: 'https://janedoe.dev' },
+  }); // JSON-LD entity, freshness, author
 </script>
 ```
 

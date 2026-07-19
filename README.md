@@ -12,12 +12,12 @@ Skills are markdown files that give AI agents specialized knowledge and workflow
 
 ## Available Skills
 
-| Skill | Description | Triggers |
-|-------|-------------|----------|
-| [vue-best-practices](skills/vue-best-practices/) | Vue.js reactivity, components, computed, watchers, Composition API | "Vue," "ref," "reactive," "computed," "v-if," "v-for" |
-| [nuxt-best-practices](skills/nuxt-best-practices/) | Nuxt data fetching, SSR, server routes, auto-imports, state | "Nuxt," "useFetch," "useAsyncData," "SSR," "useState" |
-| [nuxt-seo-best-practices](skills/nuxt-seo-best-practices/) | Nuxt SEO optimization for Cloudflare — OG images, meta tags, JSON-LD, Nitro config | "SEO," "OG image," "Open Graph," "meta tags," "JSON-LD," "Cloudflare Workers" |
-| [nuxt-geo-best-practices](skills/nuxt-geo-best-practices/) | Nuxt Generative Engine Optimization (GEO) — get cited by ChatGPT, Perplexity, Claude, AI Overviews | "GEO," "AEO," "AI search," "llms.txt," "GPTBot," "ChatGPT citations," "Perplexity," "AI Overviews," "generative engines" |
+| Skill                                                                      | Description                                                                                                                 | Triggers                                                                                                                               |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| [vue-best-practices](skills/vue-best-practices/)                           | Vue.js reactivity, components, computed, watchers, Composition API                                                          | "Vue," "ref," "reactive," "computed," "v-if," "v-for"                                                                                  |
+| [nuxt-best-practices](skills/nuxt-best-practices/)                         | Nuxt data fetching, SSR, server routes, auto-imports, state                                                                 | "Nuxt," "useFetch," "useAsyncData," "SSR," "useState"                                                                                  |
+| [nuxt-seo-best-practices](skills/nuxt-seo-best-practices/)                 | Nuxt SEO optimization for Cloudflare — OG images, meta tags, JSON-LD, Nitro config                                          | "SEO," "OG image," "Open Graph," "meta tags," "JSON-LD," "Cloudflare Workers"                                                          |
+| [nuxt-geo-best-practices](skills/nuxt-geo-best-practices/)                 | Nuxt Generative Engine Optimization (GEO) — get cited by ChatGPT, Perplexity, Claude, AI Overviews                          | "GEO," "AEO," "AI search," "llms.txt," "GPTBot," "ChatGPT citations," "Perplexity," "AI Overviews," "generative engines"               |
 | [nuxt-agent-ready-best-practices](skills/nuxt-agent-ready-best-practices/) | Nuxt agent-readiness — make your site operable by autonomous agents (MCP, WebMCP, API/skill discovery, agent auth, DNS-AID) | "agent-ready," "isitagentready," "MCP," "WebMCP," "agent skills," "API catalog," "well-known discovery," "DNS-AID," "agentic commerce" |
 
 ## Installation
@@ -96,62 +96,64 @@ You can also invoke skills directly:
 
 ### Vue Best Practices
 
-| Category | Impact | Topics |
-|----------|--------|--------|
-| Reactivity Fundamentals | CRITICAL | ref vs reactive, destructuring, toRefs, shallowRef |
-| Component Performance | CRITICAL | v-once, v-memo, async components, KeepAlive |
-| Computed & Watchers | HIGH | caching, dependencies, deep watchers |
-| Template Optimization | MEDIUM-HIGH | v-show vs v-if, keys, v-if with v-for |
-| Composition API Patterns | MEDIUM | single responsibility, return refs |
+| Category                 | Impact      | Topics                                             |
+| ------------------------ | ----------- | -------------------------------------------------- |
+| Reactivity Fundamentals  | CRITICAL    | ref vs reactive, destructuring, toRefs, shallowRef |
+| Component Performance    | CRITICAL    | v-once, v-memo, async components, KeepAlive        |
+| Computed & Watchers      | HIGH        | caching, dependencies, deep watchers               |
+| Template Optimization    | MEDIUM-HIGH | v-show vs v-if, keys, v-if with v-for              |
+| Composition API Patterns | MEDIUM      | single responsibility, return refs                 |
 
 ### Nuxt Best Practices
 
-| Category | Impact | Topics |
-|----------|--------|--------|
-| Data Fetching | CRITICAL | useFetch, unique keys, transform, error handling |
-| Auto-Imports & Organization | CRITICAL | barrel exports, component naming, type locations |
-| Server & API Routes | HIGH | validated input (Zod), route meta, runtime config |
-| Rendering Modes | HIGH | ClientOnly, route rules, hybrid rendering |
-| State Management | MEDIUM-HIGH | useState for SSR-safe state |
-| Type Safety | MEDIUM | no any, strict emits, import paths |
+| Category                    | Impact      | Topics                                                      |
+| --------------------------- | ----------- | ----------------------------------------------------------- |
+| Data Fetching               | CRITICAL    | useFetch, unique keys, transform, `enabled` option (4.5)    |
+| Auto-Imports & Organization | CRITICAL    | barrel exports, component naming, type locations            |
+| Server & API Routes         | HIGH        | validated input (Zod), route meta, runtime config           |
+| Rendering Modes             | HIGH        | ClientOnly, route rules, SSR streaming (4.5)                |
+| State Management            | MEDIUM-HIGH | useState for SSR-safe state                                 |
+| Pages, Layouts & Navigation | MEDIUM      | useLayout, named views, NuxtLink custom-slot prefetch (4.5) |
+| Type Safety                 | MEDIUM      | no any, strict emits, import paths                          |
 
 ### Nuxt SEO Best Practices
 
-| Category | Impact | Topics |
-|----------|--------|--------|
-| OG Image Generation | CRITICAL | @cf-wasm/og, Satori plain JS objects, no React |
-| Page SEO & Meta | HIGH | usePageSeo composable, Open Graph, Twitter Cards |
-| Structured Data | MEDIUM | JSON-LD, WebApplication schema, Rich Results |
-| Cloudflare & Nitro Config | HIGH | compatibilityDate, nodeCompat, SSR externals, WASM |
+| Category                  | Impact   | Topics                                             |
+| ------------------------- | -------- | -------------------------------------------------- |
+| OG Image Generation       | CRITICAL | @cf-wasm/og, Satori plain JS objects, no React     |
+| Page SEO & Meta           | HIGH     | usePageSeo composable, Open Graph, Twitter Cards   |
+| Structured Data           | MEDIUM   | JSON-LD, WebApplication schema, Rich Results       |
+| Cloudflare & Nitro Config | HIGH     | compatibilityDate, nodeCompat, SSR externals, WASM |
 
 ### Nuxt GEO Best Practices
 
 Get cited by ChatGPT, Perplexity, Claude, Google AI Overviews & AI Mode, Gemini. Built on the GEO arxiv paper (Aggarwal et al., KDD 2024) and 2,500+ tracked AI prompts from the Semrush AI Visibility Index.
 
-| Category | Impact | Topics |
-|----------|--------|--------|
-| Content Extractability | CRITICAL | Statistics, citations, quotations (+40% lift), self-contained chunks, no keyword stuffing |
+| Category               | Impact   | Topics                                                                                             |
+| ---------------------- | -------- | -------------------------------------------------------------------------------------------------- |
+| Content Extractability | CRITICAL | Statistics, citations, quotations (+40% lift), self-contained chunks, no keyword stuffing          |
 | AI Crawler & Discovery | CRITICAL | llms.txt, robots.txt for GPTBot/ClaudeBot/PerplexityBot/Google-Extended, SSR for crawlers, sitemap |
-| Entity Clarity | HIGH | Organization/Person/FAQPage/HowTo JSON-LD, sameAs cross-references, E-E-A-T |
-| Page-Level GEO | HIGH | usePageGeo composable, dateModified freshness signals |
+| Entity Clarity         | HIGH     | Organization/Person/FAQPage/HowTo JSON-LD, sameAs cross-references, E-E-A-T                        |
+| Page-Level GEO         | HIGH     | usePageGeo composable, dateModified freshness signals                                              |
 
 ### Nuxt Agent-Ready Best Practices
 
-Make your site operable by autonomous AI agents (not just cited by them) — measured by the [isitagentready.com](https://isitagentready.com) scanner. A different axis from GEO: GEO is about being *cited*, agent-readiness is about being *operated*. Shared primitives (robots.txt, llms.txt, sitemap) come from the GEO skill; this adds the agent-operation layer. Two load-bearing traps captured: the honesty rule (never publish discovery for services that don't exist) and the Nitro/Workers `event.$fetch` self-loopback bug.
+Make your site operable by autonomous AI agents (not just cited by them) — measured by the [isitagentready.com](https://isitagentready.com) scanner. A different axis from GEO: GEO is about being _cited_, agent-readiness is about being _operated_. Shared primitives (robots.txt, llms.txt, sitemap) come from the GEO skill; this adds the agent-operation layer. Two load-bearing traps captured: the honesty rule (never publish discovery for services that don't exist) and the Nitro/Workers `event.$fetch` self-loopback bug.
 
-| Category | Impact | Topics |
-|----------|--------|--------|
-| Discoverability | HIGH | RFC 8288 Link headers, RFC 9727 API catalog, agent-skills index (sha256 digest) |
-| Content | HIGH | Markdown content negotiation (Accept: text/markdown), in-process event.$fetch |
-| MCP & Tools | MEDIUM | WebMCP (navigator.modelContext), MCP Server Card (honesty-gated) |
-| Agent Auth | LOW | OAuth/OIDC discovery, oauth-protected-resource, auth.md (honesty-gated) |
-| DNS | MEDIUM | DNS-AID records + DNSSEC requirement |
+| Category        | Impact | Topics                                                                          |
+| --------------- | ------ | ------------------------------------------------------------------------------- |
+| Discoverability | HIGH   | RFC 8288 Link headers, RFC 9727 API catalog, agent-skills index (sha256 digest) |
+| Content         | HIGH   | Markdown content negotiation (Accept: text/markdown), in-process event.$fetch   |
+| MCP & Tools     | MEDIUM | WebMCP (navigator.modelContext), MCP Server Card (honesty-gated)                |
+| Agent Auth      | LOW    | OAuth/OIDC discovery, oauth-protected-resource, auth.md (honesty-gated)         |
+| DNS             | MEDIUM | DNS-AID records + DNSSEC requirement                                            |
 
 ## Contributing
 
 Found a way to improve a skill? Have a new skill to suggest? PRs and issues welcome!
 
 **Ideas for contributions:**
+
 - Improve existing skill instructions or frameworks
 - Add new best practices or patterns
 - Fix typos or clarify confusing sections
@@ -159,6 +161,7 @@ Found a way to improve a skill? Have a new skill to suggest? PRs and issues welc
 - Add examples or case studies
 
 **How to contribute:**
+
 1. Fork the repo
 2. Edit the skill file(s)
 3. Submit a PR with a clear description of what you improved

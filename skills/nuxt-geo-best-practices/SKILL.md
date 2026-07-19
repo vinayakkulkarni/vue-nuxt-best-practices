@@ -4,7 +4,7 @@ description: Nuxt GEO (Generative Engine Optimization) guidelines for getting ci
 license: MIT
 metadata:
   author: vinayakkulkarni
-  version: "1.0.0"
+  version: '1.0.0'
 ---
 
 # Nuxt GEO Best Practices
@@ -44,6 +44,8 @@ Nuxt 4 ships first-class SEO/meta primitives. Read these before reinventing anyt
 
 The `usePageGeo` composable in `page-use-page-geo.md` is a thin wrapper over these primitives; it is **not** a replacement for them.
 
+> **Nuxt 4.5 note:** head management now runs on `unhead` v3 — stricter `useHead` typing and no promise input. The `useHead` JSON-LD injection patterns in this skill use plain synchronous values and are v3-compatible. Also, 4.5's experimental SSR streaming is bot-aware: crawlers automatically receive fully-buffered HTML, so enabling it does not hurt GEO (see `ai-ssr-for-crawlers`).
+
 ## Evidence Base
 
 These rules synthesize:
@@ -56,12 +58,12 @@ These rules synthesize:
 
 ## Rule Categories by Priority
 
-| Priority | Category | Impact | Prefix |
-|----------|----------|--------|--------|
-| 1 | Content Extractability (the +40% levers) | CRITICAL | `content-` |
-| 2 | AI Crawler & Discovery | CRITICAL | `ai-` |
-| 3 | Entity Clarity | HIGH | `entity-` |
-| 4 | Page-Level GEO | HIGH | `page-` |
+| Priority | Category                                 | Impact   | Prefix     |
+| -------- | ---------------------------------------- | -------- | ---------- |
+| 1        | Content Extractability (the +40% levers) | CRITICAL | `content-` |
+| 2        | AI Crawler & Discovery                   | CRITICAL | `ai-`      |
+| 3        | Entity Clarity                           | HIGH     | `entity-`  |
+| 4        | Page-Level GEO                           | HIGH     | `page-`    |
 
 ## Quick Reference
 
@@ -108,6 +110,7 @@ rules/_sections.md
 ```
 
 Each rule file contains:
+
 - Brief explanation of why it matters (with arxiv evidence where applicable)
 - Incorrect code example with explanation
 - Correct Nuxt-specific code example

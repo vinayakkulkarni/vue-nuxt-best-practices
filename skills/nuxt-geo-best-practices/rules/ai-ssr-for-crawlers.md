@@ -13,11 +13,13 @@ Unlike Googlebot (which renders JS), most AI crawlers — GPTBot, ClaudeBot, Per
 <!-- What an AI crawler sees on a CSR Nuxt build -->
 <!DOCTYPE html>
 <html>
-<head><title>My App</title></head>
-<body>
-  <div id="__nuxt"></div>
-  <script src="/_nuxt/entry.js"></script>
-</body>
+  <head>
+    <title>My App</title>
+  </head>
+  <body>
+    <div id="__nuxt"></div>
+    <script src="/_nuxt/entry.js"></script>
+  </body>
 </html>
 ```
 
@@ -62,12 +64,7 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       crawlLinks: true,
-      routes: [
-        '/',
-        '/docs',
-        '/pricing',
-        '/blog',
-      ],
+      routes: ['/', '/docs', '/pricing', '/blog'],
     },
   },
 
@@ -144,15 +141,15 @@ A subtle bug: if you use `useFetch` with `{ server: false }`, the data is only f
 ```vue
 <!-- ❌ WRONG — { server: false } means SSR has no data → empty page for AI -->
 <script setup lang="ts">
-const { data } = await useFetch('/api/posts', { server: false });
+  const { data } = await useFetch('/api/posts', { server: false });
 </script>
 ```
 
 ```vue
 <!-- ✅ CORRECT — default behavior fetches on server, hydrates on client -->
 <script setup lang="ts">
-const { data: posts } = await useFetch('/api/posts');
-// posts is populated server-side → AI crawler sees the rendered list
+  const { data: posts } = await useFetch('/api/posts');
+  // posts is populated server-side → AI crawler sees the rendered list
 </script>
 
 <template>
@@ -166,14 +163,14 @@ const { data: posts } = await useFetch('/api/posts');
 
 ### `<ClientOnly>` is fine for widgets — bad for content
 
-| Component type | `<ClientOnly>` OK? |
-|----------------|--------------------|
-| Article body, product description, FAQ | **No** — must be SSR'd |
-| Headings, navigation, footer links | **No** — must be SSR'd |
-| Pricing tables, feature comparisons | **No** — must be SSR'd |
-| Comment widget, live chat, analytics | **Yes** — AI doesn't need these |
-| Date/time pickers, charts that need `window` | **Yes** |
-| Auth-gated dashboard widgets | **Yes** |
+| Component type                               | `<ClientOnly>` OK?              |
+| -------------------------------------------- | ------------------------------- |
+| Article body, product description, FAQ       | **No** — must be SSR'd          |
+| Headings, navigation, footer links           | **No** — must be SSR'd          |
+| Pricing tables, feature comparisons          | **No** — must be SSR'd          |
+| Comment widget, live chat, analytics         | **Yes** — AI doesn't need these |
+| Date/time pickers, charts that need `window` | **Yes**                         |
+| Auth-gated dashboard widgets                 | **Yes**                         |
 
 ### What about prerender + ISR?
 
@@ -190,5 +187,22 @@ routeRules: {
   },
 },
 ```
+
+### What about SSR streaming (Nuxt 4.5+)?
+
+Nuxt 4.5's experimental `ssrStreaming` is **bot-aware**: requests from crawler user agents automatically fall back to the fully-buffered renderer, so search engines and AI crawlers still receive complete HTML in one response. Enabling streaming for human visitors does not hurt GEO. If you run niche crawlers you care about, extend the matcher:
+
+```ts
+export default defineNuxtConfig({
+  experimental: {
+    ssrStreaming: {
+      // These UAs get buffered (fully-rendered) HTML
+      botRegex: /googlebot|bingbot|gptbot|claudebot|perplexitybot/i,
+    },
+  },
+});
+```
+
+Note the default `botRegex` already targets indexing crawlers — only override it to ADD bots, and keep the defaults' spirit (see sibling skill `nuxt-best-practices` rule `rendering-ssr-streaming` for the full caveat list).
 
 Reference: [Nuxt 4 Rendering Modes](https://nuxt.com/docs/4.x/guide/concepts/rendering) · [Nitro Prerender](https://nitro.unjs.io/config#prerender) · [Nuxt `<ClientOnly>`](https://nuxt.com/docs/4.x/api/components/client-only) · [Nuxt SEO docs](https://nuxt.com/docs/4.x/getting-started/seo-meta) · sibling skill `nuxt-best-practices` (rendering modes section)

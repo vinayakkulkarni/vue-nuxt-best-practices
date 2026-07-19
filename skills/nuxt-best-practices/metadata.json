@@ -1,7 +1,7 @@
 {
   "name": "nuxt-best-practices",
   "version": "1.0.0",
-  "description": "Nuxt 3/4 performance optimization and architecture guidelines",
+  "description": "Nuxt 4 performance optimization and architecture guidelines (current through Nuxt 4.5)",
   "author": "vinayakkulkarni",
   "license": "MIT",
   "categories": [
@@ -10,6 +10,7 @@
     "server",
     "rendering",
     "state",
+    "pages",
     "types",
     "modules",
     "perf"
