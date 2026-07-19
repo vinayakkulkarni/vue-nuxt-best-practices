@@ -141,9 +141,7 @@ export default defineNuxtConfig({
       },
     ],
 
-    sitemap: [
-      'https://example.com/sitemap.xml',
-    ],
+    sitemap: ['https://example.com/sitemap.xml'],
   },
 });
 ```
@@ -155,20 +153,20 @@ Block specific pages from AI crawlers without touching `robots.txt`:
 ```vue
 <!-- pages/private-internal-doc.vue -->
 <script setup lang="ts">
-// With @nuxtjs/robots installed — emits <meta name="robots" content="noindex">
-useRobotsRule({ index: false, follow: false });
+  // With @nuxtjs/robots installed — emits <meta name="robots" content="noindex">
+  useRobotsRule({ index: false, follow: false });
 </script>
 ```
 
 ### Decision matrix — should you allow AI crawlers?
 
-| Site type | Recommendation |
-|-----------|---------------|
-| Marketing site, docs, blog | **Allow all** — being cited in AI answers is the goal |
-| Open-source project | **Allow all** — drives developer adoption |
-| Paywalled content (news, research) | **Allow GPTBot/Claude only on free pages**, disallow paid |
-| Internal tool, customer dashboard | **Disallow all** AI crawlers + classic crawlers |
-| User-generated content with PII risk | **Disallow** until you've audited what's exposed |
+| Site type                            | Recommendation                                            |
+| ------------------------------------ | --------------------------------------------------------- |
+| Marketing site, docs, blog           | **Allow all** — being cited in AI answers is the goal     |
+| Open-source project                  | **Allow all** — drives developer adoption                 |
+| Paywalled content (news, research)   | **Allow GPTBot/Claude only on free pages**, disallow paid |
+| Internal tool, customer dashboard    | **Disallow all** AI crawlers + classic crawlers           |
+| User-generated content with PII risk | **Disallow** until you've audited what's exposed          |
 
 ### Verify the policy is live
 
@@ -187,17 +185,17 @@ curl -s -A "Google-Extended" https://your-site.com/robots.txt
 
 ### Crawler reference list (current as of 2026)
 
-| Crawler | User-Agent | What it powers |
-|---------|------------|----------------|
-| GPTBot | `GPTBot` | ChatGPT browse + training |
-| ChatGPT-User | `ChatGPT-User` | User-initiated ChatGPT browsing |
-| ClaudeBot | `ClaudeBot`, `anthropic-ai`, `Claude-Web` | Claude web search + training |
-| PerplexityBot | `PerplexityBot`, `Perplexity-User` | Perplexity search |
-| Google-Extended | `Google-Extended` | Gemini, AI Overviews, AI Mode (separate from Googlebot) |
-| Applebot-Extended | `Applebot-Extended` | Apple Intelligence (separate from Applebot) |
-| CCBot | `CCBot` | Common Crawl (used by many LLMs) |
-| Bytespider | `Bytespider` | ByteDance / Doubao |
-| meta-externalagent | `meta-externalagent`, `FacebookBot` | Meta AI |
-| cohere-ai | `cohere-ai` | Cohere |
+| Crawler            | User-Agent                                | What it powers                                          |
+| ------------------ | ----------------------------------------- | ------------------------------------------------------- |
+| GPTBot             | `GPTBot`                                  | ChatGPT browse + training                               |
+| ChatGPT-User       | `ChatGPT-User`                            | User-initiated ChatGPT browsing                         |
+| ClaudeBot          | `ClaudeBot`, `anthropic-ai`, `Claude-Web` | Claude web search + training                            |
+| PerplexityBot      | `PerplexityBot`, `Perplexity-User`        | Perplexity search                                       |
+| Google-Extended    | `Google-Extended`                         | Gemini, AI Overviews, AI Mode (separate from Googlebot) |
+| Applebot-Extended  | `Applebot-Extended`                       | Apple Intelligence (separate from Applebot)             |
+| CCBot              | `CCBot`                                   | Common Crawl (used by many LLMs)                        |
+| Bytespider         | `Bytespider`                              | ByteDance / Doubao                                      |
+| meta-externalagent | `meta-externalagent`, `FacebookBot`       | Meta AI                                                 |
+| cohere-ai          | `cohere-ai`                               | Cohere                                                  |
 
 Reference: [`@nuxtjs/robots`](https://nuxtseo.com/docs/robots) · [OpenAI GPTBot docs](https://platform.openai.com/docs/gptbot) · [Google-Extended announcement](https://blog.google/technology/ai/an-update-on-web-publisher-controls/) · [darkvisitors.com](https://darkvisitors.com) (live AI crawler list)

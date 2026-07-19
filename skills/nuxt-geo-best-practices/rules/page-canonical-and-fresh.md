@@ -26,11 +26,11 @@ If your content is genuinely fresh but doesn't expose these, the LLM treats it a
 ```vue
 <!-- ❌ WRONG — page may be updated weekly, but AI sees no signal -->
 <script setup lang="ts">
-useSeoMeta({
-  title: 'Best Vector Databases for RAG in 2026',
-  description: 'Updated comparison of vector DBs.',
-});
-// No JSON-LD, no dateModified, no canonical
+  useSeoMeta({
+    title: 'Best Vector Databases for RAG in 2026',
+    description: 'Updated comparison of vector DBs.',
+  });
+  // No JSON-LD, no dateModified, no canonical
 </script>
 ```
 
@@ -39,19 +39,19 @@ useSeoMeta({
 ```vue
 <!-- ✅ CORRECT — three layers of freshness signal -->
 <script setup lang="ts">
-const post = await useFetch('/api/posts/best-vector-databases-2026').then(
-  (r) => r.data.value,
-);
+  const post = await useFetch('/api/posts/best-vector-databases-2026').then(
+    (r) => r.data.value,
+  );
 
-usePageGeo({
-  title: post.title,
-  description: post.description,
-  path: '/blog/best-vector-databases-2026',
-  type: 'TechArticle',
-  datePublished: post.publishedAt,        // ISO 8601
-  dateModified: post.updatedAt,           // ISO 8601 — updated on every meaningful edit
-  author: post.author,
-});
+  usePageGeo({
+    title: post.title,
+    description: post.description,
+    path: '/blog/best-vector-databases-2026',
+    type: 'TechArticle',
+    datePublished: post.publishedAt, // ISO 8601
+    dateModified: post.updatedAt, // ISO 8601 — updated on every meaningful edit
+    author: post.author,
+  });
 </script>
 
 <template>
@@ -75,21 +75,21 @@ usePageGeo({
 
 ### Three layers of freshness — they all matter
 
-| Layer | Where | Audience |
-|-------|-------|----------|
-| 1. JSON-LD `dateModified` | `<script type="application/ld+json">` | LLMs (GPTBot, ClaudeBot, Perplexity) |
-| 2. Visible `<time>` element | Article header | Human users + LLMs that parse text |
-| 3. Sitemap `<lastmod>` | `/sitemap.xml` | Crawler revisit scheduling |
+| Layer                       | Where                                 | Audience                             |
+| --------------------------- | ------------------------------------- | ------------------------------------ |
+| 1. JSON-LD `dateModified`   | `<script type="application/ld+json">` | LLMs (GPTBot, ClaudeBot, Perplexity) |
+| 2. Visible `<time>` element | Article header                        | Human users + LLMs that parse text   |
+| 3. Sitemap `<lastmod>`      | `/sitemap.xml`                        | Crawler revisit scheduling           |
 
 All three should reflect the **same `dateModified`**. Inconsistency confuses the LLM and reduces trust.
 
 ### Update `dateModified` on what counts as a "meaningful edit"
 
-| Edit type | Should bump `dateModified`? |
-|-----------|----------------------------|
-| Fix typo, broken link | Optional (no need to mislead crawlers) |
-| Add new section, update statistics | **Yes** |
-| Republish with significant rewrite | **Yes** — also consider bumping `datePublished` if effectively a new article |
+| Edit type                                               | Should bump `dateModified`?                                                                            |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Fix typo, broken link                                   | Optional (no need to mislead crawlers)                                                                 |
+| Add new section, update statistics                      | **Yes**                                                                                                |
+| Republish with significant rewrite                      | **Yes** — also consider bumping `datePublished` if effectively a new article                           |
 | Auto-rendered `formatDate(new Date())` on every request | **NO** — this is the worst anti-pattern; it makes everything look fake-fresh and the LLM will catch on |
 
 ### Anti-pattern: faking freshness with build-time timestamps
@@ -97,10 +97,10 @@ All three should reflect the **same `dateModified`**. Inconsistency confuses the
 ```vue
 <!-- ❌ DO NOT DO THIS -->
 <script setup lang="ts">
-usePageGeo({
-  // ...
-  dateModified: new Date().toISOString(), // every page rebuild "updates" everything
-});
+  usePageGeo({
+    // ...
+    dateModified: new Date().toISOString(), // every page rebuild "updates" everything
+  });
 </script>
 ```
 

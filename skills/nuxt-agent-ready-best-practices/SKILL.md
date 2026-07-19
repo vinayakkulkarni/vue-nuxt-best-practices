@@ -1,29 +1,30 @@
 ---
 name: nuxt-agent-ready-best-practices
-description: "Nuxt agent-readiness guidelines for making a site operable by autonomous AI agents — not just cited by them. Covers the isitagentready.com standards: Markdown content negotiation, RFC 8288 Link headers, RFC 9727 API catalogs, Agent Skills discovery indexes, WebMCP browser tools, MCP Server Cards, OAuth/OIDC agent auth discovery, and DNS-AID. Triggers on tasks involving agent-ready, isitagentready, MCP, WebMCP, model context protocol, agent skills, API catalog, well-known discovery, agent auth, DNS-AID, A2A, or agentic commerce."
+description: 'Nuxt agent-readiness guidelines for making a site operable by autonomous AI agents — not just cited by them. Covers the isitagentready.com standards: Markdown content negotiation, RFC 8288 Link headers, RFC 9727 API catalogs, Agent Skills discovery indexes, WebMCP browser tools, MCP Server Cards, OAuth/OIDC agent auth discovery, and DNS-AID. Triggers on tasks involving agent-ready, isitagentready, MCP, WebMCP, model context protocol, agent skills, API catalog, well-known discovery, agent auth, DNS-AID, A2A, or agentic commerce.'
 license: MIT
 metadata:
   author: vinayakkulkarni
-  version: "1.1.0"
+  version: '1.1.0'
 ---
 
 # Nuxt Agent-Ready Best Practices
 
-Guidelines for making a Nuxt 4 site **operable by autonomous AI agents** — measured by the [isitagentready.com](https://isitagentready.com) scanner (Cloudflare's "Is Your Site Agent-Ready?"). This is a different axis from GEO: GEO is about being *cited* in AI answers; agent-readiness is about being *operated* — an agent authenticating, discovering your API, calling your tools, and taking action.
+Guidelines for making a Nuxt 4 site **operable by autonomous AI agents** — measured by the [isitagentready.com](https://isitagentready.com) scanner (Cloudflare's "Is Your Site Agent-Ready?"). This is a different axis from GEO: GEO is about being _cited_ in AI answers; agent-readiness is about being _operated_ — an agent authenticating, discovering your API, calling your tools, and taking action.
 
 Proven on production Nuxt 4 + Nitro `cloudflare_module` Workers:
+
 - A **marketing site** (only public POST endpoints, no auth/MCP server): **21 → 50+ (Level 1 → Level 4 "Agent-Integrated")** — the auth + MCP surfaces are honesty-gated OFF (see below).
 - A **full platform** with a real OAuth server (Better-Auth oauth-provider) + a real remote MCP server: **21 → 100/100 (Level 5 "Agent-Native"), all 14 checks green**. The auth + MCP surfaces are legitimately publishable there, which is what unlocks the last ~40 points.
 
-**The ceiling is set by what you actually run, not by effort.** A marketing site tops out around Level 4 and that is the *correct* score — do not fabricate an auth server to chase 100 (see THE HONESTY RULE). Only a site with a real authorization server and a real MCP server can honestly reach Level 5.
+**The ceiling is set by what you actually run, not by effort.** A marketing site tops out around Level 4 and that is the _correct_ score — do not fabricate an auth server to chase 100 (see THE HONESTY RULE). Only a site with a real authorization server and a real MCP server can honestly reach Level 5.
 
 ## GEO vs Agent-Readiness (know the difference)
 
-| | GEO (`nuxt-geo-best-practices`) | Agent-Readiness (this skill) |
-|---|---|---|
-| Goal | Be **cited** in AI answers | Be **operated** by agents |
-| Question | "Will ChatGPT mention me?" | "Can an agent call my tools and act?" |
-| Levers | llms.txt, crawler allowlist, RAG content, JSON-LD entities | MCP/WebMCP, API/skill discovery, agent auth, DNS-AID, agentic commerce |
+|          | GEO (`nuxt-geo-best-practices`)                            | Agent-Readiness (this skill)                                           |
+| -------- | ---------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Goal     | Be **cited** in AI answers                                 | Be **operated** by agents                                              |
+| Question | "Will ChatGPT mention me?"                                 | "Can an agent call my tools and act?"                                  |
+| Levers   | llms.txt, crawler allowlist, RAG content, JSON-LD entities | MCP/WebMCP, API/skill discovery, agent auth, DNS-AID, agentic commerce |
 
 **Shared primitives live in the GEO skill.** `robots.txt` AI-crawler allowlisting, `llms.txt`/`llms-full.txt`, and the XML sitemap are covered by `nuxt-geo-best-practices` (rules `ai-robots-allowlist`, `ai-llms-txt`, `ai-sitemap`). The isitagentready scanner scores those too — set them up via the GEO skill first, then apply this skill for the agent-operation layer on top.
 
@@ -51,11 +52,11 @@ This mirrors the "never fake customers/logos/scale" rule: a fabricated capabilit
 
 Passing the harder checks is NOT "publish the file and move on" — the isitagentready scanner inspects **content and runtime behavior**, not just presence. Three non-obvious behaviors cost real time to discover:
 
-1. **auth.md is content-scanned for "agent registration markers", not just existence.** A 200 response with a valid H1 and generic OAuth instructions still FAILS with *"auth.md exists but does not describe agent registration"*. The body must follow the [WorkOS AUTH.md](https://github.com/workos/auth.md) recipe shape — "You are an agent", "**agentic registration**", the ordered discover → register → authorize → exchange → revoke steps, and references to `register_uri`/`agent_auth`. See `auth-oauth-discovery` for the exact markers.
+1. **auth.md is content-scanned for "agent registration markers", not just existence.** A 200 response with a valid H1 and generic OAuth instructions still FAILS with _"auth.md exists but does not describe agent registration"_. The body must follow the [WorkOS AUTH.md](https://github.com/workos/auth.md) recipe shape — "You are an agent", "**agentic registration**", the ordered discover → register → authorize → exchange → revoke steps, and references to `register_uri`/`agent_auth`. See `auth-oauth-discovery` for the exact markers.
 
 2. **The `agent_auth` block in `/.well-known/oauth-authorization-server` must use WorkOS field names.** `register_uri` (not `registration_uri`), `skill`, `identity_types_supported` with valid values, plus one complete method (e.g. `anonymous.credential_types_supported` + `claim_uri`). Intuitive names silently fail the check.
 
-3. **WebMCP runs in a headless, no-GPU browser with an 8-second navigation timeout.** If your page ships heavy client JS that keeps the network busy (a live MapLibre/WebGL map streaming tiles), the checker never reaches `networkidle` and reports *"Could not check WebMCP: Navigation timeout"* — even though your tools ARE registered. Fix: skip the heavy widget when `navigator.webdriver === true` (bots get a static fallback; humans get the full experience). See `discovery-webmcp`.
+3. **WebMCP runs in a headless, no-GPU browser with an 8-second navigation timeout.** If your page ships heavy client JS that keeps the network busy (a live MapLibre/WebGL map streaming tiles), the checker never reaches `networkidle` and reports _"Could not check WebMCP: Navigation timeout"_ — even though your tools ARE registered. Fix: skip the heavy widget when `navigator.webdriver === true` (bots get a static fallback; humans get the full experience). See `discovery-webmcp`.
 
 ## SECURITY HARDENING (do this BEFORE you publish, not after)
 

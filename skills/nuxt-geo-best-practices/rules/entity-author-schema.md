@@ -29,64 +29,66 @@ Adding `Person` JSON-LD with `sameAs` cross-references (LinkedIn, Twitter/X, Git
 ```vue
 <!-- ✅ CORRECT — full author entity with credentials and sameAs -->
 <script setup lang="ts">
-const post = {
-  title: 'How to Mitigate XSS in Nuxt 4',
-  description: 'Practical guide to preventing cross-site scripting in Nuxt 4 apps using CSP, sanitization, and Vue\'s built-in defenses.',
-  datePublished: '2026-04-01T10:00:00Z',
-  dateModified: '2026-04-15T14:30:00Z',
-  url: 'https://example.com/blog/xss-in-nuxt-4',
-};
+  const post = {
+    title: 'How to Mitigate XSS in Nuxt 4',
+    description:
+      "Practical guide to preventing cross-site scripting in Nuxt 4 apps using CSP, sanitization, and Vue's built-in defenses.",
+    datePublished: '2026-04-01T10:00:00Z',
+    dateModified: '2026-04-15T14:30:00Z',
+    url: 'https://example.com/blog/xss-in-nuxt-4',
+  };
 
-const author = {
-  name: 'Jane Doe',
-  jobTitle: 'Principal Security Engineer',
-  worksFor: 'My App, Inc.',
-  url: 'https://janedoe.dev',
-  description: 'Web security engineer with 12 years at Cloudflare and Google. Author of "Practical Web Security" (O\'Reilly, 2024).',
-  sameAs: [
-    'https://www.linkedin.com/in/janedoe',
-    'https://twitter.com/janedoe',
-    'https://github.com/janedoe',
-    'https://scholar.google.com/citations?user=ABC123',
-    'https://orcid.org/0000-0002-1825-0097',
-    'https://www.oreilly.com/people/jane-doe/',
-  ],
-  knowsAbout: [
-    'Web security',
-    'Cross-site scripting (XSS)',
-    'Content Security Policy',
-    'Cloudflare Workers security',
-    'Vue.js',
-    'Nuxt',
-  ],
-};
+  const author = {
+    name: 'Jane Doe',
+    jobTitle: 'Principal Security Engineer',
+    worksFor: 'My App, Inc.',
+    url: 'https://janedoe.dev',
+    description:
+      'Web security engineer with 12 years at Cloudflare and Google. Author of "Practical Web Security" (O\'Reilly, 2024).',
+    sameAs: [
+      'https://www.linkedin.com/in/janedoe',
+      'https://twitter.com/janedoe',
+      'https://github.com/janedoe',
+      'https://scholar.google.com/citations?user=ABC123',
+      'https://orcid.org/0000-0002-1825-0097',
+      'https://www.oreilly.com/people/jane-doe/',
+    ],
+    knowsAbout: [
+      'Web security',
+      'Cross-site scripting (XSS)',
+      'Content Security Policy',
+      'Cloudflare Workers security',
+      'Vue.js',
+      'Nuxt',
+    ],
+  };
 
-useHead({
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Article',
-        headline: post.title,
-        description: post.description,
-        datePublished: post.datePublished,
-        dateModified: post.dateModified,
-        url: post.url,
-        mainEntityOfPage: post.url,
-        author: {
-          '@type': 'Person',
-          '@id': `${author.url}#person`,
-          ...author,
-        },
-        publisher: {
-          '@type': 'Organization',
-          '@id': 'https://example.com/#organization',
-        },
-      }),
-    },
-  ],
-});
+  useHead({
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: post.title,
+          description: post.description,
+          datePublished: post.datePublished,
+          dateModified: post.dateModified,
+          url: post.url,
+          mainEntityOfPage: post.url,
+          author: {
+            '@type': 'Person',
+            '@id': `${author.url}#person`,
+            ...author,
+          },
+          publisher: {
+            '@type': 'Organization',
+            '@id': 'https://example.com/#organization',
+          },
+        }),
+      },
+    ],
+  });
 </script>
 
 <template>
@@ -94,8 +96,8 @@ useHead({
     <h1>{{ post.title }}</h1>
     <p class="byline">
       By
-      <a :href="author.url" rel="author">{{ author.name }}</a>,
-      {{ author.jobTitle }} at {{ author.worksFor }}
+      <a :href="author.url" rel="author">{{ author.name }}</a
+      >, {{ author.jobTitle }} at {{ author.worksFor }}
       ·
       <time :datetime="post.datePublished">
         Published {{ new Date(post.datePublished).toLocaleDateString() }}
@@ -116,21 +118,21 @@ useHead({
 
 ```vue
 <script setup lang="ts">
-useSchemaOrg([
-  defineArticle({
-    headline: post.title,
-    description: post.description,
-    datePublished: post.datePublished,
-    dateModified: post.dateModified,
-    author: definePerson({
-      name: author.name,
-      jobTitle: author.jobTitle,
-      url: author.url,
-      sameAs: author.sameAs,
-      knowsAbout: author.knowsAbout,
+  useSchemaOrg([
+    defineArticle({
+      headline: post.title,
+      description: post.description,
+      datePublished: post.datePublished,
+      dateModified: post.dateModified,
+      author: definePerson({
+        name: author.name,
+        jobTitle: author.jobTitle,
+        url: author.url,
+        sameAs: author.sameAs,
+        knowsAbout: author.knowsAbout,
+      }),
     }),
-  }),
-]);
+  ]);
 </script>
 ```
 
@@ -141,23 +143,23 @@ Each author should have a dedicated `/about/jane-doe` page that **also** emits t
 ```vue
 <!-- pages/about/[author].vue -->
 <script setup lang="ts">
-const route = useRoute();
-const author = await fetchAuthor(route.params.author as string);
+  const route = useRoute();
+  const author = await fetchAuthor(route.params.author as string);
 
-useSchemaOrg([
-  definePerson({
-    '@id': `https://example.com/about/${author.slug}#person`,
-    name: author.name,
-    jobTitle: author.jobTitle,
-    url: `https://example.com/about/${author.slug}`,
-    image: author.headshot,
-    description: author.bio,
-    sameAs: author.sameAs,
-    knowsAbout: author.expertiseAreas,
-    alumniOf: author.education,
-    award: author.awards,
-  }),
-]);
+  useSchemaOrg([
+    definePerson({
+      '@id': `https://example.com/about/${author.slug}#person`,
+      name: author.name,
+      jobTitle: author.jobTitle,
+      url: `https://example.com/about/${author.slug}`,
+      image: author.headshot,
+      description: author.bio,
+      sameAs: author.sameAs,
+      knowsAbout: author.expertiseAreas,
+      alumniOf: author.education,
+      award: author.awards,
+    }),
+  ]);
 </script>
 ```
 
@@ -165,11 +167,11 @@ useSchemaOrg([
 
 This is the LLM's strongest topical authority signal for an author. Be specific:
 
-| Vague (low GEO value) | Specific (high GEO value) |
-|----------------------|---------------------------|
-| "Programming" | "Vue.js", "Nuxt 4", "TypeScript", "Vite plugin development" |
-| "Marketing" | "B2B SaaS positioning", "PLG conversion optimization", "developer relations" |
-| "AI" | "Retrieval-augmented generation", "transformer architecture", "LLM fine-tuning" |
+| Vague (low GEO value) | Specific (high GEO value)                                                       |
+| --------------------- | ------------------------------------------------------------------------------- |
+| "Programming"         | "Vue.js", "Nuxt 4", "TypeScript", "Vite plugin development"                     |
+| "Marketing"           | "B2B SaaS positioning", "PLG conversion optimization", "developer relations"    |
+| "AI"                  | "Retrieval-augmented generation", "transformer architecture", "LLM fine-tuning" |
 
 ### YMYL extra requirements
 

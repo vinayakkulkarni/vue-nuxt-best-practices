@@ -7,7 +7,7 @@ tags: link-headers, rfc-8288, discovery, nitro, middleware
 
 ## Advertise Resources with RFC 8288 `Link` Headers
 
-The isitagentready scanner checks for [RFC 8288](https://www.rfc-editor.org/rfc/rfc8288) `Link` response headers on your homepage. They let an agent discover your machine-readable resources (`llms.txt`, sitemap, API catalog) from *any* response, instead of probing well-known paths one by one.
+The isitagentready scanner checks for [RFC 8288](https://www.rfc-editor.org/rfc/rfc8288) `Link` response headers on your homepage. They let an agent discover your machine-readable resources (`llms.txt`, sitemap, API catalog) from _any_ response, instead of probing well-known paths one by one.
 
 Implement once in a Nitro **server middleware** so every response carries them.
 

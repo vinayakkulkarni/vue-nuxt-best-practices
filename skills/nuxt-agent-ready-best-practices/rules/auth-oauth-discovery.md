@@ -16,7 +16,7 @@ isitagentready checks for OAuth/OIDC discovery so agents can authenticate with p
 
 ### HONESTY GATE — do not publish these on a site with no auth server
 
-These are only legitimate when a **real authorization server** issues tokens. A marketing site whose `/api/v1/*` endpoints are public has no `authorization_endpoint`/`token_endpoint` — publishing this discovery points agents at nothing and they fail on first token request. **Skip it.** If you want the score, put it on the domain that actually runs auth (e.g. your app/console with Better Auth), mapping the *real* endpoints.
+These are only legitimate when a **real authorization server** issues tokens. A marketing site whose `/api/v1/*` endpoints are public has no `authorization_endpoint`/`token_endpoint` — publishing this discovery points agents at nothing and they fail on first token request. **Skip it.** If you want the score, put it on the domain that actually runs auth (e.g. your app/console with Better Auth), mapping the _real_ endpoints.
 
 **Correct (only where a real OIDC/OAuth server exists — e.g. the console app):**
 
@@ -31,8 +31,8 @@ export default defineEventHandler((event: H3Event) => {
   return {
     issuer: ISSUER,
     authorization_endpoint: `${ISSUER}/api/v1/auth/authorize`, // must be REAL
-    token_endpoint: `${ISSUER}/api/v1/auth/token`,             // must be REAL
-    jwks_uri: `${ISSUER}/api/v1/auth/jwks`,                    // must be REAL
+    token_endpoint: `${ISSUER}/api/v1/auth/token`, // must be REAL
+    jwks_uri: `${ISSUER}/api/v1/auth/jwks`, // must be REAL
     grant_types_supported: ['authorization_code', 'refresh_token'],
     response_types_supported: ['code'],
     scopes_supported: ['openid', 'email', 'profile'],
@@ -63,7 +63,7 @@ Add the top-level RFC 8414 fields too (`issuer`, `token_endpoint`, `revocation_e
 
 ### auth.md is CONTENT-scanned for "agent registration markers"
 
-Serving `/auth.md` with a 200 and a valid H1 is **not enough**. The checker greps the markdown body for agent-registration markers and fails with *"auth.md exists but does not describe agent registration"* if they're absent — generic "here's how to OAuth" prose does not pass. Write it in the [WorkOS AUTH.md](https://github.com/workos/auth.md) recipe shape:
+Serving `/auth.md` with a 200 and a valid H1 is **not enough**. The checker greps the markdown body for agent-registration markers and fails with _"auth.md exists but does not describe agent registration"_ if they're absent — generic "here's how to OAuth" prose does not pass. Write it in the [WorkOS AUTH.md](https://github.com/workos/auth.md) recipe shape:
 
 ```md
 # Auth.md — Agent Registration for <site>
@@ -73,19 +73,23 @@ register → authorize → exchange for an access token → call the API → han
 revocation. Follow the steps in order.
 
 ## Step 1 — Discover
+
 Fetch `/.well-known/oauth-protected-resource` (PRM, RFC 9728) and
 `/.well-known/oauth-authorization-server` (RFC 8414). The `agent_auth` block
 carries this skill (`skill`), the registration endpoint (`register_uri`), and
 `identity_types_supported`.
 
 ## Step 2 — Register
+
 Dynamic Client Registration (RFC 7591): POST client metadata to `register_uri`.
 
-## Step 3 — Authorize   ## Step 4 — Exchange   ## Step 5 — Use the access token
+## Step 3 — Authorize ## Step 4 — Exchange ## Step 5 — Use the access token
+
 Standard OAuth 2.1 + PKCE; exchange the code at the token_endpoint; call with
 `Authorization: Bearer <token>`.
 
 ## Revocation
+
 Tokens revocable at the `revocation_endpoint` (RFC 7009).
 ```
 

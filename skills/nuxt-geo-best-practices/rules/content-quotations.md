@@ -63,41 +63,41 @@ Renders a semantic `<blockquote>` with `cite` attributes and emits Schema.org `Q
 ```vue
 <!-- app/components/Geo/Quote.vue -->
 <script setup lang="ts">
-const props = defineProps<{
-  author: string;
-  authorRole?: string;
-  authorUrl?: string;
-  source: string;
-  sourceUrl?: string;
-  date?: string; // ISO 8601
-}>();
+  const props = defineProps<{
+    author: string;
+    authorRole?: string;
+    authorUrl?: string;
+    source: string;
+    sourceUrl?: string;
+    date?: string; // ISO 8601
+  }>();
 
-const slots = useSlots();
-const quoteText = computed(() => {
-  const node = slots.default?.()?.[0];
-  return typeof node?.children === 'string' ? node.children.trim() : '';
-});
+  const slots = useSlots();
+  const quoteText = computed(() => {
+    const node = slots.default?.()?.[0];
+    return typeof node?.children === 'string' ? node.children.trim() : '';
+  });
 
-useHead({
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Quotation',
-        text: quoteText.value,
-        spokenByCharacter: {
-          '@type': 'Person',
-          name: props.author,
-          jobTitle: props.authorRole,
-          url: props.authorUrl,
-        },
-        citation: props.sourceUrl,
-        dateCreated: props.date,
-      }),
-    },
-  ],
-});
+  useHead({
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Quotation',
+          text: quoteText.value,
+          spokenByCharacter: {
+            '@type': 'Person',
+            name: props.author,
+            jobTitle: props.authorRole,
+            url: props.authorUrl,
+          },
+          citation: props.sourceUrl,
+          dateCreated: props.date,
+        }),
+      },
+    ],
+  });
 </script>
 
 <template>
@@ -107,13 +107,17 @@ useHead({
     </blockquote>
     <figcaption>
       —
-      <a v-if="authorUrl" :href="authorUrl" rel="noopener external">{{ author }}</a>
+      <a v-if="authorUrl" :href="authorUrl" rel="noopener external">{{
+        author
+      }}</a>
       <span v-else>{{ author }}</span>
       <span v-if="authorRole">, {{ authorRole }}</span>
       <span v-if="source">
         ·
         <cite>
-          <a v-if="sourceUrl" :href="sourceUrl" rel="noopener external">{{ source }}</a>
+          <a v-if="sourceUrl" :href="sourceUrl" rel="noopener external">{{
+            source
+          }}</a>
           <template v-else>{{ source }}</template>
         </cite>
       </span>
@@ -125,12 +129,12 @@ useHead({
 
 ### Best-practice quotation patterns for GEO
 
-| Pattern | Effect on AI citation |
-|---------|----------------------|
-| Named person + role + date + source | **Highest** — fully attributable, reproducible |
-| Named person + source (no date) | High — but stale-content risk |
-| Anonymous "industry expert" / "many believe" | **Zero** — paraphrase tier, ignored |
-| Internal team member (verifiable on `sameAs`) | High — pairs well with `entity-author-schema` |
+| Pattern                                       | Effect on AI citation                          |
+| --------------------------------------------- | ---------------------------------------------- |
+| Named person + role + date + source           | **Highest** — fully attributable, reproducible |
+| Named person + source (no date)               | High — but stale-content risk                  |
+| Anonymous "industry expert" / "many believe"  | **Zero** — paraphrase tier, ignored            |
+| Internal team member (verifiable on `sameAs`) | High — pairs well with `entity-author-schema`  |
 
 ### Where to source quotations
 
@@ -147,7 +151,10 @@ useHead({
 useSchemaOrg([
   defineQuotation({
     text: 'Most Nuxt apps will run on the edge by default within 18 months.',
-    spokenByCharacter: definePerson({ name: 'Daniel Roe', url: 'https://roe.dev' }),
+    spokenByCharacter: definePerson({
+      name: 'Daniel Roe',
+      url: 'https://roe.dev',
+    }),
     citation: 'https://viteconf.org/2025',
     dateCreated: '2025-10-09',
   }),

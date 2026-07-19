@@ -54,11 +54,11 @@ This means a paragraph that depends on context above it ("As mentioned earlier..
 
     <h2>Neon — best for serverless Postgres with branching</h2>
     <p>
-      Neon is a serverless Postgres provider with database branching, which
-      lets each Git branch in your Nuxt app get its own isolated DB copy. Cold
-      start is ~300ms; sustained queries match traditional Postgres. Neon is
-      the best choice when you need full Postgres features (extensions, JSON,
-      PostGIS) and a Git-style workflow for schema changes.
+      Neon is a serverless Postgres provider with database branching, which lets
+      each Git branch in your Nuxt app get its own isolated DB copy. Cold start
+      is ~300ms; sustained queries match traditional Postgres. Neon is the best
+      choice when you need full Postgres features (extensions, JSON, PostGIS)
+      and a Git-style workflow for schema changes.
     </p>
 
     <h2>Turso — best for global multi-region SQLite replication</h2>
@@ -85,21 +85,21 @@ If no → rewrite to:
 
 ### Front-load the answer (inverted pyramid)
 
-| Position in section | What to put | Why |
-|---------------------|-------------|-----|
-| First sentence of `<h2>` block | The direct answer | Highest retrieval probability |
-| Second sentence | Supporting statistic | Pairs with `content-statistics` |
-| Third sentence onward | Nuance, edge cases, alternatives | Read by humans, often dropped by LLMs |
+| Position in section            | What to put                      | Why                                   |
+| ------------------------------ | -------------------------------- | ------------------------------------- |
+| First sentence of `<h2>` block | The direct answer                | Highest retrieval probability         |
+| Second sentence                | Supporting statistic             | Pairs with `content-statistics`       |
+| Third sentence onward          | Nuance, edge cases, alternatives | Read by humans, often dropped by LLMs |
 
 ### Heading hierarchy matters
 
 LLMs use heading text as a strong signal of which chunk is "about" what. Make headings **descriptive declaratives**, not teasers:
 
-| Heading style | GEO friendly? |
-|---------------|---------------|
-| `## Cloudflare D1 — best for edge-first apps under 10GB` | Yes — entity + verdict |
-| `## Why we picked D1` | No — pronoun, no entity |
-| `## A surprising choice` | No — clickbait, no information |
+| Heading style                                            | GEO friendly?                  |
+| -------------------------------------------------------- | ------------------------------ |
+| `## Cloudflare D1 — best for edge-first apps under 10GB` | Yes — entity + verdict         |
+| `## Why we picked D1`                                    | No — pronoun, no entity        |
+| `## A surprising choice`                                 | No — clickbait, no information |
 
 ### Use semantic HTML, not just `<div>`
 

@@ -25,14 +25,15 @@ Each skill entry includes `digest: "sha256:<hex>"` of the SKILL.md artifact. If 
       "type": "skill-md",
       "description": "Run the free Google Business Profile audit and get a scorecard.",
       "url": "https://your-site.com/.well-known/agent-skills/free-audit/SKILL.md",
-      "digest": "sha256:0b7afdf087ec3becec2a535ec3561db3ef2b230626060250323526613d8db38a"
-    }
-  ]
+      "digest": "sha256:0b7afdf087ec3becec2a535ec3561db3ef2b230626060250323526613d8db38a",
+    },
+  ],
 }
 ```
 
 ```md
 <!-- public/.well-known/agent-skills/free-audit/SKILL.md -->
+
 # Run a free audit
 
 POST https://your-site.com/api/v1/free-audit with { brand, email, consent:true }.

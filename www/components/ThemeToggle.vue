@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { Sun, Moon } from 'lucide-vue-next'
-import { Button } from '@/components/ui/button'
+  import { Sun, Moon } from 'lucide-vue-next';
+  import { Button } from '@/components/ui/button';
 
-const colorMode = useColorMode()
+  const colorMode = useColorMode();
 
-function toggleTheme() {
-  colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
-}
+  function toggleTheme() {
+    colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark';
+  }
 </script>
 
 <template>

@@ -33,22 +33,22 @@ The GEO paper's "Cite Sources" method produced one of the largest visibility lif
 ```vue
 <!-- ✅ CORRECT — citations turn opinion into evidence the LLM will surface -->
 <script setup lang="ts">
-const sources = [
-  {
-    id: 'google-cwv',
-    title: 'Core Web Vitals & Conversion Rate',
-    publisher: 'Google',
-    url: 'https://web.dev/vitals-business-impact/',
-    accessed: '2026-04-15',
-  },
-  {
-    id: 'akamai-2024',
-    title: 'State of Online Retail Performance',
-    publisher: 'Akamai',
-    url: 'https://www.akamai.com/state-of-online-retail',
-    accessed: '2026-04-15',
-  },
-];
+  const sources = [
+    {
+      id: 'google-cwv',
+      title: 'Core Web Vitals & Conversion Rate',
+      publisher: 'Google',
+      url: 'https://web.dev/vitals-business-impact/',
+      accessed: '2026-04-15',
+    },
+    {
+      id: 'akamai-2024',
+      title: 'State of Online Retail Performance',
+      publisher: 'Akamai',
+      url: 'https://www.akamai.com/state-of-online-retail',
+      accessed: '2026-04-15',
+    },
+  ];
 </script>
 
 <template>
@@ -73,38 +73,42 @@ Standardize citation rendering and emit JSON-LD `citation` properties so AI craw
 ```vue
 <!-- app/components/Geo/Sources.vue -->
 <script setup lang="ts">
-interface Source {
-  id: string;
-  title: string;
-  publisher?: string;
-  author?: string;
-  url: string;
-  accessed?: string;
-  datePublished?: string;
-}
+  interface Source {
+    id: string;
+    title: string;
+    publisher?: string;
+    author?: string;
+    url: string;
+    accessed?: string;
+    datePublished?: string;
+  }
 
-const props = defineProps<{ sources: Source[] }>();
+  const props = defineProps<{ sources: Source[] }>();
 
-// Emit Schema.org Article citations for the LLMs that parse JSON-LD
-useHead({
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Article',
-        citation: props.sources.map((s) => ({
-          '@type': 'CreativeWork',
-          name: s.title,
-          url: s.url,
-          publisher: s.publisher ? { '@type': 'Organization', name: s.publisher } : undefined,
-          author: s.author ? { '@type': 'Person', name: s.author } : undefined,
-          datePublished: s.datePublished,
-        })),
-      }),
-    },
-  ],
-});
+  // Emit Schema.org Article citations for the LLMs that parse JSON-LD
+  useHead({
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          citation: props.sources.map((s) => ({
+            '@type': 'CreativeWork',
+            name: s.title,
+            url: s.url,
+            publisher: s.publisher
+              ? { '@type': 'Organization', name: s.publisher }
+              : undefined,
+            author: s.author
+              ? { '@type': 'Person', name: s.author }
+              : undefined,
+            datePublished: s.datePublished,
+          })),
+        }),
+      },
+    ],
+  });
 </script>
 
 <template>
@@ -115,7 +119,9 @@ useHead({
         <a :href="s.url" rel="noopener external">
           {{ s.title }}<span v-if="s.publisher"> — {{ s.publisher }}</span>
         </a>
-        <span v-if="s.accessed" class="accessed"> (accessed {{ s.accessed }})</span>
+        <span v-if="s.accessed" class="accessed">
+          (accessed {{ s.accessed }})</span
+        >
       </li>
     </ol>
   </section>
@@ -126,12 +132,12 @@ useHead({
 
 LLMs weight sources differently. From most to least preferred (observed via Semrush AI Visibility Index, Oct 2025):
 
-| Tier | Examples |
-|------|----------|
-| **S** (highest) | Peer-reviewed papers (arXiv, PubMed, IEEE), official docs (MDN, Nuxt, Vue), government data (`.gov`, EU Open Data) |
-| **A** | Established news (Reuters, AP, FT, NYT), Wikipedia (with cited sources), industry incumbents (Google, Cloudflare, Vercel) |
-| **B** | Reddit (subreddit-dependent), Stack Overflow accepted answers, GitHub README of 1000+ star repos, conference talks |
-| **C** | Personal blogs without citations, Medium without author credentials, marketing pages |
+| Tier            | Examples                                                                                                                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **S** (highest) | Peer-reviewed papers (arXiv, PubMed, IEEE), official docs (MDN, Nuxt, Vue), government data (`.gov`, EU Open Data)        |
+| **A**           | Established news (Reuters, AP, FT, NYT), Wikipedia (with cited sources), industry incumbents (Google, Cloudflare, Vercel) |
+| **B**           | Reddit (subreddit-dependent), Stack Overflow accepted answers, GitHub README of 1000+ star repos, conference talks        |
+| **C**           | Personal blogs without citations, Medium without author credentials, marketing pages                                      |
 
 Cite from S/A tier whenever possible. **Self-citation also helps** — link to your own past articles to build a topical authority cluster the LLM can navigate.
 

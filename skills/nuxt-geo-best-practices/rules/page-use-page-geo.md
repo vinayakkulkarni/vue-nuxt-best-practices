@@ -16,30 +16,30 @@ This wraps Nuxt's official primitives — [`useSeoMeta`](https://nuxt.com/docs/4
 ```vue
 <!-- ❌ WRONG — duplicated across every page, easy to forget fields -->
 <script setup lang="ts">
-const config = useRuntimeConfig();
-const baseUrl = config.public.baseUrl;
+  const config = useRuntimeConfig();
+  const baseUrl = config.public.baseUrl;
 
-useSeoMeta({
-  title: 'How to Deploy Nuxt to Cloudflare',
-  description: 'Step-by-step guide.',
-  ogTitle: 'How to Deploy Nuxt to Cloudflare',
-  ogUrl: `${baseUrl}/blog/cloudflare-deploy`,
-});
+  useSeoMeta({
+    title: 'How to Deploy Nuxt to Cloudflare',
+    description: 'Step-by-step guide.',
+    ogTitle: 'How to Deploy Nuxt to Cloudflare',
+    ogUrl: `${baseUrl}/blog/cloudflare-deploy`,
+  });
 
-useHead({
-  link: [{ rel: 'canonical', href: `${baseUrl}/blog/cloudflare-deploy` }],
-  script: [
-    {
-      type: 'application/ld+json',
-      innerHTML: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Article',
-        headline: 'How to Deploy Nuxt to Cloudflare',
-        // ...lots of repetitive JSON-LD per page...
-      }),
-    },
-  ],
-});
+  useHead({
+    link: [{ rel: 'canonical', href: `${baseUrl}/blog/cloudflare-deploy` }],
+    script: [
+      {
+        type: 'application/ld+json',
+        innerHTML: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: 'How to Deploy Nuxt to Cloudflare',
+          // ...lots of repetitive JSON-LD per page...
+        }),
+      },
+    ],
+  });
 </script>
 ```
 
@@ -47,7 +47,14 @@ useHead({
 
 ```ts
 // app/composables/geo/use-page-geo.ts
-type ContentType = 'Article' | 'BlogPosting' | 'NewsArticle' | 'TechArticle' | 'FAQPage' | 'HowTo' | 'WebPage';
+type ContentType =
+  | 'Article'
+  | 'BlogPosting'
+  | 'NewsArticle'
+  | 'TechArticle'
+  | 'FAQPage'
+  | 'HowTo'
+  | 'WebPage';
 
 interface PageGeoOptions {
   /** Page title — used for <title>, og:title, twitter:title, JSON-LD headline */
@@ -82,7 +89,8 @@ export function usePageGeo(options: PageGeoOptions) {
 
   const canonicalUrl = `${baseUrl}${options.path}`;
   const type = options.type ?? 'WebPage';
-  const dateModified = options.dateModified ?? options.datePublished ?? new Date().toISOString();
+  const dateModified =
+    options.dateModified ?? options.datePublished ?? new Date().toISOString();
 
   // 1. Canonical link (avoid duplicate-content downranking)
   useHead({
@@ -171,26 +179,31 @@ export function usePageGeo(options: PageGeoOptions) {
 ```vue
 <!-- ✅ Usage on a page — one composable call -->
 <script setup lang="ts">
-usePageGeo({
-  title: 'How to Deploy a Nuxt 4 App to Cloudflare Workers in 5 Minutes',
-  description: 'Step-by-step deployment guide. Cold start ~50ms, free tier 100k req/day, custom domain in <60s DNS propagation.',
-  path: '/blog/cloudflare-deploy',
-  type: 'TechArticle',
-  datePublished: '2026-04-01T10:00:00Z',
-  dateModified: '2026-04-15T14:30:00Z',
-  author: {
-    name: 'Jane Doe',
-    url: 'https://janedoe.dev',
-    sameAs: ['https://www.linkedin.com/in/janedoe', 'https://github.com/janedoe'],
-  },
-});
+  usePageGeo({
+    title: 'How to Deploy a Nuxt 4 App to Cloudflare Workers in 5 Minutes',
+    description:
+      'Step-by-step deployment guide. Cold start ~50ms, free tier 100k req/day, custom domain in <60s DNS propagation.',
+    path: '/blog/cloudflare-deploy',
+    type: 'TechArticle',
+    datePublished: '2026-04-01T10:00:00Z',
+    dateModified: '2026-04-15T14:30:00Z',
+    author: {
+      name: 'Jane Doe',
+      url: 'https://janedoe.dev',
+      sameAs: [
+        'https://www.linkedin.com/in/janedoe',
+        'https://github.com/janedoe',
+      ],
+    },
+  });
 
-// Pair with usePageSeo (sibling skill) for OG/Twitter
-usePageSeo({
-  title: 'How to Deploy a Nuxt 4 App to Cloudflare Workers in 5 Minutes',
-  description: 'Step-by-step deployment guide. Cold start ~50ms, free tier 100k req/day.',
-  path: '/blog/cloudflare-deploy',
-});
+  // Pair with usePageSeo (sibling skill) for OG/Twitter
+  usePageSeo({
+    title: 'How to Deploy a Nuxt 4 App to Cloudflare Workers in 5 Minutes',
+    description:
+      'Step-by-step deployment guide. Cold start ~50ms, free tier 100k req/day.',
+    path: '/blog/cloudflare-deploy',
+  });
 </script>
 ```
 
@@ -261,20 +274,21 @@ They're complementary — SEO covers social cards and basic meta, GEO covers JSO
 
 ```vue
 <script setup lang="ts">
-const meta = {
-  title: 'Why Edge Rendering Wins in 2026',
-  description: 'Cold start <50ms, $0.50/M requests, automatic global distribution.',
-  path: '/blog/edge-rendering-2026',
-};
+  const meta = {
+    title: 'Why Edge Rendering Wins in 2026',
+    description:
+      'Cold start <50ms, $0.50/M requests, automatic global distribution.',
+    path: '/blog/edge-rendering-2026',
+  };
 
-usePageSeo({ ...meta }); // OG, Twitter, canonical, social images
-usePageGeo({
-  ...meta,
-  type: 'BlogPosting',
-  datePublished: '2026-04-01T10:00:00Z',
-  dateModified: '2026-04-15T14:30:00Z',
-  author: { name: 'Jane Doe', url: 'https://janedoe.dev' },
-}); // JSON-LD entity, freshness, author
+  usePageSeo({ ...meta }); // OG, Twitter, canonical, social images
+  usePageGeo({
+    ...meta,
+    type: 'BlogPosting',
+    datePublished: '2026-04-01T10:00:00Z',
+    dateModified: '2026-04-15T14:30:00Z',
+    author: { name: 'Jane Doe', url: 'https://janedoe.dev' },
+  }); // JSON-LD entity, freshness, author
 </script>
 ```
 

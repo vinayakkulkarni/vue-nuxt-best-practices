@@ -1,11 +1,11 @@
 <script setup lang="ts">
-const colorMode = useColorMode()
+  const colorMode = useColorMode();
 
-useHead({
-  htmlAttrs: {
-    class: computed(() => colorMode.value),
-  },
-})
+  useHead({
+    htmlAttrs: {
+      class: computed(() => colorMode.value),
+    },
+  });
 </script>
 
 <template>

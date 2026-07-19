@@ -46,7 +46,10 @@ export default defineNuxtPlugin(() => {
     description: 'Run the free Google Business Profile audit for a brand.',
     inputSchema: {
       type: 'object',
-      properties: { brand: { type: 'string' }, email: { type: 'string', format: 'email' } },
+      properties: {
+        brand: { type: 'string' },
+        email: { type: 'string', format: 'email' },
+      },
       required: ['brand', 'email'],
     },
     execute: async (input) =>
@@ -67,7 +70,7 @@ export default defineNuxtPlugin(() => {
 
 ### The headless-browser networkidle trap (the #1 false failure)
 
-The scanner checks WebMCP by loading your page in a **headless, no-GPU browser with an 8-second navigation timeout**, waiting for `networkidle`, then inspecting `navigator.modelContext`. If your page ships heavy client JS that keeps the network busy past 8s — most commonly a **live MapLibre/WebGL map streaming vector tiles**, or any long-running animation that fetches — the checker times out with *"Could not check WebMCP: Navigation timeout of 8000 ms exceeded"* **even though your tools registered correctly**. The failure is about page load, not about WebMCP.
+The scanner checks WebMCP by loading your page in a **headless, no-GPU browser with an 8-second navigation timeout**, waiting for `networkidle`, then inspecting `navigator.modelContext`. If your page ships heavy client JS that keeps the network busy past 8s — most commonly a **live MapLibre/WebGL map streaming vector tiles**, or any long-running animation that fetches — the checker times out with _"Could not check WebMCP: Navigation timeout of 8000 ms exceeded"_ **even though your tools registered correctly**. The failure is about page load, not about WebMCP.
 
 Fix: detect automation and skip the heavy widget. Bots get a lightweight static fallback so the page reaches `networkidle` fast; humans get the full experience. The WebMCP tools register regardless (they're cheap and map-independent).
 
@@ -87,7 +90,7 @@ Fix: detect automation and skip the heavy widget. Bots get a lightweight static 
 </template>
 ```
 
-Delaying the heavy work (e.g. starting a map animation 15s after idle) is NOT enough — the *initial* tile load alone can exceed the 8s window. Gating on `navigator.webdriver` is the reliable fix. Verify both paths (see below): the bot path must reach `networkidle` in a few seconds AND still expose the tools.
+Delaying the heavy work (e.g. starting a map animation 15s after idle) is NOT enough — the _initial_ tile load alone can exceed the 8s window. Gating on `navigator.webdriver` is the reliable fix. Verify both paths (see below): the bot path must reach `networkidle` in a few seconds AND still expose the tools.
 
 ### Verify in a real browser (Playwright)
 
@@ -113,11 +116,19 @@ await page.addInitScript(() => {
   Object.defineProperty(navigator, 'webdriver', { get: () => true });
 });
 const t0 = Date.now();
-await page.goto('https://your-site.com/', { waitUntil: 'networkidle', timeout: 15000 });
+await page.goto('https://your-site.com/', {
+  waitUntil: 'networkidle',
+  timeout: 15000,
+});
 console.log('bot networkidle in', Date.now() - t0, 'ms'); // want < 8000
-console.log(await page.evaluate(() => document.querySelectorAll('canvas').length)); // 0 (map skipped)
-console.log(await page.evaluate(async () =>
-  (await navigator.modelContext.getTools()).map((t) => t.name))); // tools still present
+console.log(
+  await page.evaluate(() => document.querySelectorAll('canvas').length),
+); // 0 (map skipped)
+console.log(
+  await page.evaluate(async () =>
+    (await navigator.modelContext.getTools()).map((t) => t.name),
+  ),
+); // tools still present
 ```
 
 Reference: [WebMCP spec](https://webmachinelearning.github.io/webmcp/) · [Chrome WebMCP EPP](https://developer.chrome.com/blog/webmcp-epp)

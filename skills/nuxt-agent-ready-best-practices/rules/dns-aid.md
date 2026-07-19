@@ -25,7 +25,7 @@ tags: dns-aid, dns, svcb, https-record, dnssec, cloudflare, discovery
 
 ### The DNSSEC requirement (the real blocker)
 
-DNS-AID draft-01 requires the discovery zone be **DNSSEC-signed** — the scanner needs `AD=true` (Authenticated Data) from a validating resolver. Publishing the record is not enough; without DNSSEC the check stays red with *"records found but DNSSEC was not validated"*.
+DNS-AID draft-01 requires the discovery zone be **DNSSEC-signed** — the scanner needs `AD=true` (Authenticated Data) from a validating resolver. Publishing the record is not enough; without DNSSEC the check stays red with _"records found but DNSSEC was not validated"_.
 
 Enabling DNSSEC is two steps and often **user-gated** (a default API token usually lacks the DNSSEC scope — error 10000):
 

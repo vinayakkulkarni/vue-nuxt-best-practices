@@ -1,0 +1,14 @@
+packages:
+  - skills/*
+  - www
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+  vue-demi: true
+minimumReleaseAgeExclude:
+  - lint-staged@17.1.0
+  - nuxt
+  - '@nuxt/*'
+  - '@nuxtjs/*'
+  - vue
+  - '@vue/*'

@@ -32,7 +32,11 @@ export default defineEventHandler(async (event) => {
   const baseUrl = config.public.baseUrl || 'https://example.com';
 
   setResponseHeader(event, 'Content-Type', 'text/plain; charset=utf-8');
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600');
+  setResponseHeader(
+    event,
+    'Cache-Control',
+    'public, max-age=3600, s-maxage=3600',
+  );
 
   return `# My App
 
@@ -84,7 +88,11 @@ const PRIORITY_ROUTES = [
 
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'Content-Type', 'text/plain; charset=utf-8');
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600');
+  setResponseHeader(
+    event,
+    'Cache-Control',
+    'public, max-age=3600, s-maxage=3600',
+  );
 
   const config = useRuntimeConfig();
   const baseUrl = config.public.baseUrl || 'https://example.com';
@@ -159,7 +167,7 @@ curl -s https://your-site.com/llms-full.txt | wc -c
 
 ### Test that ChatGPT/Claude can fetch it
 
-Open ChatGPT and prompt: *"Fetch https://your-site.com/llms.txt and summarize the most important pages."* If it returns the structured index, you're set.
+Open ChatGPT and prompt: _"Fetch https://your-site.com/llms.txt and summarize the most important pages."_ If it returns the structured index, you're set.
 
 ### When to update
 

@@ -23,7 +23,10 @@ export default defineEventHandler((event: H3Event) => {
   setHeader(event, 'Content-Type', 'application/json');
   return {
     serverInfo: { name: 'your-app-mcp', version: '1.0.0' },
-    transport: { type: 'streamable-http', endpoint: 'https://your-site.com/mcp' }, // must be REAL
+    transport: {
+      type: 'streamable-http',
+      endpoint: 'https://your-site.com/mcp',
+    }, // must be REAL
     capabilities: { tools: {}, resources: {} },
   };
 });

@@ -106,7 +106,11 @@ export default defineEventHandler(async (event) => {
   ];
 
   setResponseHeader(event, 'Content-Type', 'application/xml; charset=utf-8');
-  setResponseHeader(event, 'Cache-Control', 'public, max-age=3600, s-maxage=3600');
+  setResponseHeader(
+    event,
+    'Cache-Control',
+    'public, max-age=3600, s-maxage=3600',
+  );
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -125,12 +129,12 @@ ${urls
 
 ### `lastmod` accuracy matters — don't fake it
 
-| Behavior | Effect |
-|----------|--------|
-| Accurate per-URL `lastmod` from CMS/DB | **Best** — crawlers prioritize fresh content correctly |
+| Behavior                                        | Effect                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------- |
+| Accurate per-URL `lastmod` from CMS/DB          | **Best** — crawlers prioritize fresh content correctly              |
 | File mtime (auto-detected by `@nuxtjs/sitemap`) | **Good** — works for static content, slightly noisy if you reformat |
-| `lastmod = build time` for everything | **Bad** — every URL looks "fresh", crawlers ignore the signal |
-| No `lastmod` at all | **Bad** — crawlers fall back to their own heuristics |
+| `lastmod = build time` for everything           | **Bad** — every URL looks "fresh", crawlers ignore the signal       |
+| No `lastmod` at all                             | **Bad** — crawlers fall back to their own heuristics                |
 
 ### Reference the sitemap from `robots.txt`
 

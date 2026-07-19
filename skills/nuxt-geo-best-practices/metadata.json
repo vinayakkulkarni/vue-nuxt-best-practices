@@ -4,12 +4,7 @@
   "description": "Nuxt Generative Engine Optimization (GEO) guidelines for AI search visibility (ChatGPT, Perplexity, Claude, AI Overviews)",
   "author": "vinayakkulkarni",
   "license": "MIT",
-  "categories": [
-    "content",
-    "ai",
-    "entity",
-    "page"
-  ],
+  "categories": ["content", "ai", "entity", "page"],
   "tags": [
     "nuxt",
     "nuxt4",

@@ -1,25 +1,26 @@
 # Nuxt Agent-Ready Best Practices - Complete Reference
 
 > This file is auto-generated. Do not edit directly.
-> Edit individual rule files in the `rules/` directory and run `bun run build`.
+> Edit individual rule files in the `rules/` directory and run `pnpm build`.
 
 # Nuxt Agent-Ready Best Practices
 
-Guidelines for making a Nuxt 4 site **operable by autonomous AI agents** — measured by the [isitagentready.com](https://isitagentready.com) scanner (Cloudflare's "Is Your Site Agent-Ready?"). This is a different axis from GEO: GEO is about being *cited* in AI answers; agent-readiness is about being *operated* — an agent authenticating, discovering your API, calling your tools, and taking action.
+Guidelines for making a Nuxt 4 site **operable by autonomous AI agents** — measured by the [isitagentready.com](https://isitagentready.com) scanner (Cloudflare's "Is Your Site Agent-Ready?"). This is a different axis from GEO: GEO is about being _cited_ in AI answers; agent-readiness is about being _operated_ — an agent authenticating, discovering your API, calling your tools, and taking action.
 
 Proven on production Nuxt 4 + Nitro `cloudflare_module` Workers:
+
 - A **marketing site** (only public POST endpoints, no auth/MCP server): **21 → 50+ (Level 1 → Level 4 "Agent-Integrated")** — the auth + MCP surfaces are honesty-gated OFF (see below).
 - A **full platform** with a real OAuth server (Better-Auth oauth-provider) + a real remote MCP server: **21 → 100/100 (Level 5 "Agent-Native"), all 14 checks green**. The auth + MCP surfaces are legitimately publishable there, which is what unlocks the last ~40 points.
 
-**The ceiling is set by what you actually run, not by effort.** A marketing site tops out around Level 4 and that is the *correct* score — do not fabricate an auth server to chase 100 (see THE HONESTY RULE). Only a site with a real authorization server and a real MCP server can honestly reach Level 5.
+**The ceiling is set by what you actually run, not by effort.** A marketing site tops out around Level 4 and that is the _correct_ score — do not fabricate an auth server to chase 100 (see THE HONESTY RULE). Only a site with a real authorization server and a real MCP server can honestly reach Level 5.
 
 ## GEO vs Agent-Readiness (know the difference)
 
-| | GEO (`nuxt-geo-best-practices`) | Agent-Readiness (this skill) |
-|---|---|---|
-| Goal | Be **cited** in AI answers | Be **operated** by agents |
-| Question | "Will ChatGPT mention me?" | "Can an agent call my tools and act?" |
-| Levers | llms.txt, crawler allowlist, RAG content, JSON-LD entities | MCP/WebMCP, API/skill discovery, agent auth, DNS-AID, agentic commerce |
+|          | GEO (`nuxt-geo-best-practices`)                            | Agent-Readiness (this skill)                                           |
+| -------- | ---------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Goal     | Be **cited** in AI answers                                 | Be **operated** by agents                                              |
+| Question | "Will ChatGPT mention me?"                                 | "Can an agent call my tools and act?"                                  |
+| Levers   | llms.txt, crawler allowlist, RAG content, JSON-LD entities | MCP/WebMCP, API/skill discovery, agent auth, DNS-AID, agentic commerce |
 
 **Shared primitives live in the GEO skill.** `robots.txt` AI-crawler allowlisting, `llms.txt`/`llms-full.txt`, and the XML sitemap are covered by `nuxt-geo-best-practices` (rules `ai-robots-allowlist`, `ai-llms-txt`, `ai-sitemap`). The isitagentready scanner scores those too — set them up via the GEO skill first, then apply this skill for the agent-operation layer on top.
 
@@ -47,11 +48,11 @@ This mirrors the "never fake customers/logos/scale" rule: a fabricated capabilit
 
 Passing the harder checks is NOT "publish the file and move on" — the isitagentready scanner inspects **content and runtime behavior**, not just presence. Three non-obvious behaviors cost real time to discover:
 
-1. **auth.md is content-scanned for "agent registration markers", not just existence.** A 200 response with a valid H1 and generic OAuth instructions still FAILS with *"auth.md exists but does not describe agent registration"*. The body must follow the [WorkOS AUTH.md](https://github.com/workos/auth.md) recipe shape — "You are an agent", "**agentic registration**", the ordered discover → register → authorize → exchange → revoke steps, and references to `register_uri`/`agent_auth`. See `auth-oauth-discovery` for the exact markers.
+1. **auth.md is content-scanned for "agent registration markers", not just existence.** A 200 response with a valid H1 and generic OAuth instructions still FAILS with _"auth.md exists but does not describe agent registration"_. The body must follow the [WorkOS AUTH.md](https://github.com/workos/auth.md) recipe shape — "You are an agent", "**agentic registration**", the ordered discover → register → authorize → exchange → revoke steps, and references to `register_uri`/`agent_auth`. See `auth-oauth-discovery` for the exact markers.
 
 2. **The `agent_auth` block in `/.well-known/oauth-authorization-server` must use WorkOS field names.** `register_uri` (not `registration_uri`), `skill`, `identity_types_supported` with valid values, plus one complete method (e.g. `anonymous.credential_types_supported` + `claim_uri`). Intuitive names silently fail the check.
 
-3. **WebMCP runs in a headless, no-GPU browser with an 8-second navigation timeout.** If your page ships heavy client JS that keeps the network busy (a live MapLibre/WebGL map streaming tiles), the checker never reaches `networkidle` and reports *"Could not check WebMCP: Navigation timeout"* — even though your tools ARE registered. Fix: skip the heavy widget when `navigator.webdriver === true` (bots get a static fallback; humans get the full experience). See `discovery-webmcp`.
+3. **WebMCP runs in a headless, no-GPU browser with an 8-second navigation timeout.** If your page ships heavy client JS that keeps the network busy (a live MapLibre/WebGL map streaming tiles), the checker never reaches `networkidle` and reports _"Could not check WebMCP: Navigation timeout"_ — even though your tools ARE registered. Fix: skip the heavy widget when `navigator.webdriver === true` (bots get a static fallback; humans get the full experience). See `discovery-webmcp`.
 
 ## SECURITY HARDENING (do this BEFORE you publish, not after)
 
@@ -99,7 +100,7 @@ isitagentready checks for OAuth/OIDC discovery so agents can authenticate with p
 
 ### HONESTY GATE — do not publish these on a site with no auth server
 
-These are only legitimate when a **real authorization server** issues tokens. A marketing site whose `/api/v1/*` endpoints are public has no `authorization_endpoint`/`token_endpoint` — publishing this discovery points agents at nothing and they fail on first token request. **Skip it.** If you want the score, put it on the domain that actually runs auth (e.g. your app/console with Better Auth), mapping the *real* endpoints.
+These are only legitimate when a **real authorization server** issues tokens. A marketing site whose `/api/v1/*` endpoints are public has no `authorization_endpoint`/`token_endpoint` — publishing this discovery points agents at nothing and they fail on first token request. **Skip it.** If you want the score, put it on the domain that actually runs auth (e.g. your app/console with Better Auth), mapping the _real_ endpoints.
 
 **Correct (only where a real OIDC/OAuth server exists — e.g. the console app):**
 
@@ -114,8 +115,8 @@ export default defineEventHandler((event: H3Event) => {
   return {
     issuer: ISSUER,
     authorization_endpoint: `${ISSUER}/api/v1/auth/authorize`, // must be REAL
-    token_endpoint: `${ISSUER}/api/v1/auth/token`,             // must be REAL
-    jwks_uri: `${ISSUER}/api/v1/auth/jwks`,                    // must be REAL
+    token_endpoint: `${ISSUER}/api/v1/auth/token`, // must be REAL
+    jwks_uri: `${ISSUER}/api/v1/auth/jwks`, // must be REAL
     grant_types_supported: ['authorization_code', 'refresh_token'],
     response_types_supported: ['code'],
     scopes_supported: ['openid', 'email', 'profile'],
@@ -146,7 +147,7 @@ Add the top-level RFC 8414 fields too (`issuer`, `token_endpoint`, `revocation_e
 
 ### auth.md is CONTENT-scanned for "agent registration markers"
 
-Serving `/auth.md` with a 200 and a valid H1 is **not enough**. The checker greps the markdown body for agent-registration markers and fails with *"auth.md exists but does not describe agent registration"* if they're absent — generic "here's how to OAuth" prose does not pass. Write it in the [WorkOS AUTH.md](https://github.com/workos/auth.md) recipe shape:
+Serving `/auth.md` with a 200 and a valid H1 is **not enough**. The checker greps the markdown body for agent-registration markers and fails with _"auth.md exists but does not describe agent registration"_ if they're absent — generic "here's how to OAuth" prose does not pass. Write it in the [WorkOS AUTH.md](https://github.com/workos/auth.md) recipe shape:
 
 ```md
 # Auth.md — Agent Registration for <site>
@@ -156,19 +157,23 @@ register → authorize → exchange for an access token → call the API → han
 revocation. Follow the steps in order.
 
 ## Step 1 — Discover
+
 Fetch `/.well-known/oauth-protected-resource` (PRM, RFC 9728) and
 `/.well-known/oauth-authorization-server` (RFC 8414). The `agent_auth` block
 carries this skill (`skill`), the registration endpoint (`register_uri`), and
 `identity_types_supported`.
 
 ## Step 2 — Register
+
 Dynamic Client Registration (RFC 7591): POST client metadata to `register_uri`.
 
-## Step 3 — Authorize   ## Step 4 — Exchange   ## Step 5 — Use the access token
+## Step 3 — Authorize ## Step 4 — Exchange ## Step 5 — Use the access token
+
 Standard OAuth 2.1 + PKCE; exchange the code at the token_endpoint; call with
 `Authorization: Bearer <token>`.
 
 ## Revocation
+
 Tokens revocable at the `revocation_endpoint` (RFC 7009).
 ```
 
@@ -289,14 +294,15 @@ Each skill entry includes `digest: "sha256:<hex>"` of the SKILL.md artifact. If 
       "type": "skill-md",
       "description": "Run the free Google Business Profile audit and get a scorecard.",
       "url": "https://your-site.com/.well-known/agent-skills/free-audit/SKILL.md",
-      "digest": "sha256:0b7afdf087ec3becec2a535ec3561db3ef2b230626060250323526613d8db38a"
-    }
-  ]
+      "digest": "sha256:0b7afdf087ec3becec2a535ec3561db3ef2b230626060250323526613d8db38a",
+    },
+  ],
 }
 ```
 
 ```md
 <!-- public/.well-known/agent-skills/free-audit/SKILL.md -->
+
 # Run a free audit
 
 POST https://your-site.com/api/v1/free-audit with { brand, email, consent:true }.
@@ -385,7 +391,7 @@ Reference: [RFC 9727 (API Catalog)](https://www.rfc-editor.org/rfc/rfc9727) — 
 
 ## Advertise Resources with RFC 8288 `Link` Headers
 
-The isitagentready scanner checks for [RFC 8288](https://www.rfc-editor.org/rfc/rfc8288) `Link` response headers on your homepage. They let an agent discover your machine-readable resources (`llms.txt`, sitemap, API catalog) from *any* response, instead of probing well-known paths one by one.
+The isitagentready scanner checks for [RFC 8288](https://www.rfc-editor.org/rfc/rfc8288) `Link` response headers on your homepage. They let an agent discover your machine-readable resources (`llms.txt`, sitemap, API catalog) from _any_ response, instead of probing well-known paths one by one.
 
 Implement once in a Nitro **server middleware** so every response carries them.
 
@@ -450,7 +456,10 @@ export default defineEventHandler((event: H3Event) => {
   setHeader(event, 'Content-Type', 'application/json');
   return {
     serverInfo: { name: 'your-app-mcp', version: '1.0.0' },
-    transport: { type: 'streamable-http', endpoint: 'https://your-site.com/mcp' }, // must be REAL
+    transport: {
+      type: 'streamable-http',
+      endpoint: 'https://your-site.com/mcp',
+    }, // must be REAL
     capabilities: { tools: {}, resources: {} },
   };
 });
@@ -515,7 +524,10 @@ export default defineNuxtPlugin(() => {
     description: 'Run the free Google Business Profile audit for a brand.',
     inputSchema: {
       type: 'object',
-      properties: { brand: { type: 'string' }, email: { type: 'string', format: 'email' } },
+      properties: {
+        brand: { type: 'string' },
+        email: { type: 'string', format: 'email' },
+      },
       required: ['brand', 'email'],
     },
     execute: async (input) =>
@@ -536,7 +548,7 @@ export default defineNuxtPlugin(() => {
 
 ### The headless-browser networkidle trap (the #1 false failure)
 
-The scanner checks WebMCP by loading your page in a **headless, no-GPU browser with an 8-second navigation timeout**, waiting for `networkidle`, then inspecting `navigator.modelContext`. If your page ships heavy client JS that keeps the network busy past 8s — most commonly a **live MapLibre/WebGL map streaming vector tiles**, or any long-running animation that fetches — the checker times out with *"Could not check WebMCP: Navigation timeout of 8000 ms exceeded"* **even though your tools registered correctly**. The failure is about page load, not about WebMCP.
+The scanner checks WebMCP by loading your page in a **headless, no-GPU browser with an 8-second navigation timeout**, waiting for `networkidle`, then inspecting `navigator.modelContext`. If your page ships heavy client JS that keeps the network busy past 8s — most commonly a **live MapLibre/WebGL map streaming vector tiles**, or any long-running animation that fetches — the checker times out with _"Could not check WebMCP: Navigation timeout of 8000 ms exceeded"_ **even though your tools registered correctly**. The failure is about page load, not about WebMCP.
 
 Fix: detect automation and skip the heavy widget. Bots get a lightweight static fallback so the page reaches `networkidle` fast; humans get the full experience. The WebMCP tools register regardless (they're cheap and map-independent).
 
@@ -556,7 +568,7 @@ Fix: detect automation and skip the heavy widget. Bots get a lightweight static 
 </template>
 ```
 
-Delaying the heavy work (e.g. starting a map animation 15s after idle) is NOT enough — the *initial* tile load alone can exceed the 8s window. Gating on `navigator.webdriver` is the reliable fix. Verify both paths (see below): the bot path must reach `networkidle` in a few seconds AND still expose the tools.
+Delaying the heavy work (e.g. starting a map animation 15s after idle) is NOT enough — the _initial_ tile load alone can exceed the 8s window. Gating on `navigator.webdriver` is the reliable fix. Verify both paths (see below): the bot path must reach `networkidle` in a few seconds AND still expose the tools.
 
 ### Verify in a real browser (Playwright)
 
@@ -582,11 +594,19 @@ await page.addInitScript(() => {
   Object.defineProperty(navigator, 'webdriver', { get: () => true });
 });
 const t0 = Date.now();
-await page.goto('https://your-site.com/', { waitUntil: 'networkidle', timeout: 15000 });
+await page.goto('https://your-site.com/', {
+  waitUntil: 'networkidle',
+  timeout: 15000,
+});
 console.log('bot networkidle in', Date.now() - t0, 'ms'); // want < 8000
-console.log(await page.evaluate(() => document.querySelectorAll('canvas').length)); // 0 (map skipped)
-console.log(await page.evaluate(async () =>
-  (await navigator.modelContext.getTools()).map((t) => t.name))); // tools still present
+console.log(
+  await page.evaluate(() => document.querySelectorAll('canvas').length),
+); // 0 (map skipped)
+console.log(
+  await page.evaluate(async () =>
+    (await navigator.modelContext.getTools()).map((t) => t.name),
+  ),
+); // tools still present
 ```
 
 Reference: [WebMCP spec](https://webmachinelearning.github.io/webmcp/) · [Chrome WebMCP EPP](https://developer.chrome.com/blog/webmcp-epp)
@@ -617,7 +637,7 @@ Reference: [WebMCP spec](https://webmachinelearning.github.io/webmcp/) · [Chrom
 
 ### The DNSSEC requirement (the real blocker)
 
-DNS-AID draft-01 requires the discovery zone be **DNSSEC-signed** — the scanner needs `AD=true` (Authenticated Data) from a validating resolver. Publishing the record is not enough; without DNSSEC the check stays red with *"records found but DNSSEC was not validated"*.
+DNS-AID draft-01 requires the discovery zone be **DNSSEC-signed** — the scanner needs `AD=true` (Authenticated Data) from a validating resolver. Publishing the record is not enough; without DNSSEC the check stays red with _"records found but DNSSEC was not validated"_.
 
 Enabling DNSSEC is two steps and often **user-gated** (a default API token usually lacks the DNSSEC scope — error 10000):
 
@@ -653,7 +673,7 @@ Making a site agent-operable means advertising a public API key to every page an
 To render a live basemap (or any authed widget) on public pages, you embed a `NUXT_PUBLIC_*` API key in the client bundle — it's in page source and now handed to browser agents via WebMCP. Two invariants:
 
 - **Origin-restrict it.** A key with empty `allowedOrigins` works from any site and any server-side caller. Lock it to your own origins (`https://your-site.com`, `https://www.your-site.com`).
-- **Own it with a non-privileged account.** If the key's owner has an `admin`/superadmin role, your workers likely **skip quota enforcement** for admin-owned keys — so a scraper who lifts the key from page source gets *unlimited, untracked* calls to expensive endpoints (tiles, geocoding, browser-render). Mint a dedicated, scope-minimal, non-admin key for the public embed.
+- **Own it with a non-privileged account.** If the key's owner has an `admin`/superadmin role, your workers likely **skip quota enforcement** for admin-owned keys — so a scraper who lifts the key from page source gets _unlimited, untracked_ calls to expensive endpoints (tiles, geocoding, browser-render). Mint a dedicated, scope-minimal, non-admin key for the public embed.
 
 ```ts
 // ❌ WRONG — admin-owned, no origin restriction, baked into every page
@@ -668,12 +688,14 @@ Remember `NUXT_PUBLIC_*` is baked at **build** time. On a local-wrangler deploy 
 
 ### 2. Never echo the key in WebMCP tool errors
 
-A WebMCP `execute` callback that does `throw new Error(\`fetch failed: \${err}\`)` can leak the request URL — including `?key=...` — into an error surfaced to the agent/user. Sanitize:
+A WebMCP `execute` callback that does `throw new Error(\`fetch failed: \${err}\`)`can leak the request URL — including`?key=...` — into an error surfaced to the agent/user. Sanitize:
 
 ```ts
 execute: async (input) => {
   try {
-    return await $fetch('/api/v1/geocoding/search', { query: { text: input.q } });
+    return await $fetch('/api/v1/geocoding/search', {
+      query: { text: input.q },
+    });
   } catch {
     // Do NOT interpolate the caught error — it can contain the key-bearing URL.
     throw new Error('Geocoding request failed.');

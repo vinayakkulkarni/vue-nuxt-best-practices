@@ -14,7 +14,7 @@ Making a site agent-operable means advertising a public API key to every page an
 To render a live basemap (or any authed widget) on public pages, you embed a `NUXT_PUBLIC_*` API key in the client bundle — it's in page source and now handed to browser agents via WebMCP. Two invariants:
 
 - **Origin-restrict it.** A key with empty `allowedOrigins` works from any site and any server-side caller. Lock it to your own origins (`https://your-site.com`, `https://www.your-site.com`).
-- **Own it with a non-privileged account.** If the key's owner has an `admin`/superadmin role, your workers likely **skip quota enforcement** for admin-owned keys — so a scraper who lifts the key from page source gets *unlimited, untracked* calls to expensive endpoints (tiles, geocoding, browser-render). Mint a dedicated, scope-minimal, non-admin key for the public embed.
+- **Own it with a non-privileged account.** If the key's owner has an `admin`/superadmin role, your workers likely **skip quota enforcement** for admin-owned keys — so a scraper who lifts the key from page source gets _unlimited, untracked_ calls to expensive endpoints (tiles, geocoding, browser-render). Mint a dedicated, scope-minimal, non-admin key for the public embed.
 
 ```ts
 // ❌ WRONG — admin-owned, no origin restriction, baked into every page
@@ -29,12 +29,14 @@ Remember `NUXT_PUBLIC_*` is baked at **build** time. On a local-wrangler deploy 
 
 ### 2. Never echo the key in WebMCP tool errors
 
-A WebMCP `execute` callback that does `throw new Error(\`fetch failed: \${err}\`)` can leak the request URL — including `?key=...` — into an error surfaced to the agent/user. Sanitize:
+A WebMCP `execute` callback that does `throw new Error(\`fetch failed: \${err}\`)`can leak the request URL — including`?key=...` — into an error surfaced to the agent/user. Sanitize:
 
 ```ts
 execute: async (input) => {
   try {
-    return await $fetch('/api/v1/geocoding/search', { query: { text: input.q } });
+    return await $fetch('/api/v1/geocoding/search', {
+      query: { text: input.q },
+    });
   } catch {
     // Do NOT interpolate the caught error — it can contain the key-bearing URL.
     throw new Error('Geocoding request failed.');

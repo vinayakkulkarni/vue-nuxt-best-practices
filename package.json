@@ -1,40 +1,47 @@
 {
   "name": "vue-nuxt-best-practices",
   "version": "1.6.1",
+  "private": true,
   "description": "Vue and Nuxt skills for Claude Code and AI agents. Reactivity, component performance, data fetching, SSR patterns, and full-stack best practices.",
+  "license": "MIT",
   "author": {
     "name": "Vinayak Kulkarni",
     "email": "inbox.vinayak@gmail.com",
     "url": "https://vinayakkulkarni.dev"
   },
-  "license": "MIT",
-  "private": true,
-  "workspaces": [
-    "skills/*"
-  ],
+  "type": "module",
   "scripts": {
-    "build": "bun run build:vue && bun run build:nuxt && bun run build:seo && bun run build:geo && bun run build:agent-ready",
-    "build:vue": "bun run --cwd skills/vue-best-practices build",
-    "build:nuxt": "bun run --cwd skills/nuxt-best-practices build",
-    "build:seo": "bun run --cwd skills/nuxt-seo-best-practices build",
-    "build:geo": "bun run --cwd skills/nuxt-geo-best-practices build",
-    "build:agent-ready": "bun run --cwd skills/nuxt-agent-ready-best-practices build",
-    "validate": "bun run validate:vue && bun run validate:nuxt && bun run validate:seo && bun run validate:geo && bun run validate:agent-ready",
-    "validate:vue": "bun run --cwd skills/vue-best-practices validate",
-    "validate:nuxt": "bun run --cwd skills/nuxt-best-practices validate",
-    "validate:seo": "bun run --cwd skills/nuxt-seo-best-practices validate",
-    "validate:geo": "bun run --cwd skills/nuxt-geo-best-practices validate",
-    "validate:agent-ready": "bun run --cwd skills/nuxt-agent-ready-best-practices validate",
-    "prepare": "is-ci || husky"
+    "build": "pnpm --filter './skills/*' run build",
+    "build:vue": "pnpm --filter vue-best-practices run build",
+    "build:nuxt": "pnpm --filter nuxt-best-practices run build",
+    "build:seo": "pnpm --filter nuxt-seo-best-practices run build",
+    "build:geo": "pnpm --filter nuxt-geo-best-practices run build",
+    "build:agent-ready": "pnpm --filter nuxt-agent-ready-best-practices run build",
+    "validate": "pnpm --filter './skills/*' run validate",
+    "validate:vue": "pnpm --filter vue-best-practices run validate",
+    "validate:nuxt": "pnpm --filter nuxt-best-practices run validate",
+    "validate:seo": "pnpm --filter nuxt-seo-best-practices run validate",
+    "validate:geo": "pnpm --filter nuxt-geo-best-practices run validate",
+    "validate:agent-ready": "pnpm --filter nuxt-agent-ready-best-practices run validate",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint . --fix",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.5.3",
-    "@commitlint/config-conventional": "^20.5.3",
+    "@commitlint/cli": "^21.2.1",
+    "@commitlint/config-conventional": "^21.2.0",
     "husky": "^9.1.7",
-    "is-ci": "^4.1.0",
-    "lint-staged": "^17.0.8"
+    "lint-staged": "^17.1.0",
+    "oxfmt": "^0.59.0",
+    "oxlint": "^1.74.0"
   },
-  "engines": {
-    "node": ">=24.0.0"
-  }
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">=24.11.0"
+    }
+  },
+  "packageManager": "pnpm@11.15.0+sha512.266f8957a30d2be6e9468e5e66bcdedd35a794175f71b067ba8504d686cce1d0c0f429b33c323c3c569ad4891e667574a49ff71d1b89a22cc66f13c65818c578"
 }

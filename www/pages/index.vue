@@ -1,37 +1,41 @@
 <script setup lang="ts">
-import { Star, Github } from 'lucide-vue-next'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+  import { Star, Github } from 'lucide-vue-next';
+  import { Badge } from '@/components/ui/badge';
+  import { Button } from '@/components/ui/button';
 
-const GITHUB_URL = 'https://github.com/vinayakkulkarni/vue-nuxt-best-practices'
-const INSTALL_COMMAND = 'npx skills add vinayakkulkarni/vue-nuxt-best-practices'
+  const GITHUB_URL =
+    'https://github.com/vinayakkulkarni/vue-nuxt-best-practices';
+  const INSTALL_COMMAND =
+    'npx skills add vinayakkulkarni/vue-nuxt-best-practices';
 
-const starCount = ref<number | null>(null)
+  const starCount = ref<number | null>(null);
 
-onMounted(async () => {
-  try {
-    const response = await fetch(
-      'https://api.github.com/repos/vinayakkulkarni/vue-nuxt-best-practices'
-    )
-    const data = await response.json()
-    if (data.stargazers_count) {
-      starCount.value = data.stargazers_count
+  onMounted(async () => {
+    try {
+      const response = await fetch(
+        'https://api.github.com/repos/vinayakkulkarni/vue-nuxt-best-practices',
+      );
+      const data = await response.json();
+      if (data.stargazers_count) {
+        starCount.value = data.stargazers_count;
+      }
+    } catch {
+      starCount.value = null;
     }
-  } catch {
-    starCount.value = null
-  }
-})
+  });
 
-function formatStars(count: number) {
-  if (count >= 1000) {
-    return `${(count / 1000).toFixed(1)}k`
+  function formatStars(count: number) {
+    if (count >= 1000) {
+      return `${(count / 1000).toFixed(1)}k`;
+    }
+    return count.toString();
   }
-  return count.toString()
-}
 </script>
 
 <template>
-  <div class="flex min-h-screen flex-col items-center justify-center px-6 py-24">
+  <div
+    class="flex min-h-screen flex-col items-center justify-center px-6 py-24"
+  >
     <div class="fixed top-4 right-4">
       <ThemeToggle />
     </div>
@@ -48,7 +52,9 @@ function formatStars(count: number) {
           class="transition-colors group-hover:bg-accent"
         >
           <Star class="h-3.5 w-3.5" aria-hidden="true" />
-          <span v-if="starCount !== null">{{ formatStars(starCount) }} stars on GitHub</span>
+          <span v-if="starCount !== null"
+            >{{ formatStars(starCount) }} stars on GitHub</span
+          >
           <span v-else>Star on GitHub</span>
         </Badge>
       </a>
@@ -71,13 +77,21 @@ function formatStars(count: number) {
         </p>
       </div>
 
-      <Button as="a" :href="GITHUB_URL" target="_blank" rel="noopener noreferrer" size="lg">
+      <Button
+        as="a"
+        :href="GITHUB_URL"
+        target="_blank"
+        rel="noopener noreferrer"
+        size="lg"
+      >
         <Github class="mr-2 h-4 w-4" aria-hidden="true" />
         View on GitHub
       </Button>
     </main>
 
-    <footer class="mt-16 flex items-center justify-center gap-2 text-sm text-muted-foreground">
+    <footer
+      class="mt-16 flex items-center justify-center gap-2 text-sm text-muted-foreground"
+    >
       <span>Built by</span>
       <a
         href="https://vinayakkulkarni.dev"
