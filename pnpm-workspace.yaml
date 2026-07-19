@@ -12,3 +12,9 @@ minimumReleaseAgeExclude:
   - '@nuxtjs/*'
   - vue
   - '@vue/*'
+  - unhead
+  - '@unhead/*'
+overrides:
+  # nuxt/nuxt#35670: 4.5.0 cloudflare preset build fails parsing
+  # unhead/dist/stream/iife.mjs; fixed in unhead 3.2.0+
+  unhead: '>=3.2.1'
