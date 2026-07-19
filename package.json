@@ -25,8 +25,8 @@
     "validate:agent-ready": "pnpm --filter nuxt-agent-ready-best-practices run validate",
     "lint": "oxlint .",
     "lint:fix": "oxlint . --fix",
-    "fmt": "oxfmt",
-    "fmt:check": "oxfmt --check",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "prepare": "husky"
   },
   "devDependencies": {
