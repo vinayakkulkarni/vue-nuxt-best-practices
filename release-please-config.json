@@ -12,7 +12,10 @@
       "prerelease": false,
       "extra-files": [
         "skills/vue-best-practices/package.json",
-        "skills/nuxt-best-practices/package.json"
+        "skills/nuxt-best-practices/package.json",
+        "skills/nuxt-seo-best-practices/package.json",
+        "skills/nuxt-geo-best-practices/package.json",
+        "skills/nuxt-agent-ready-best-practices/package.json"
       ]
     }
   },
