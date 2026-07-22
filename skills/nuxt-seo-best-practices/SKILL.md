@@ -41,6 +41,7 @@ Reference these guidelines when:
 - `og-cf-workers` - Generate dynamic OG images on Cloudflare Workers with @cf-wasm/og
 - `og-no-react` - Use plain JS objects for Satori elements, NEVER React
 - `og-cache-headers` - Cache OG images with immutable headers for CDN
+- `og-corp-cross-origin` - Serve OG images with CORP cross-origin or every social card silently breaks
 
 ### 2. Page SEO & Meta (HIGH)
 

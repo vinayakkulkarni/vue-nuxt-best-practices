@@ -78,6 +78,35 @@ Social media platforms (Twitter, Facebook, LinkedIn, Discord, Slack) use Open Gr
 - **1200×630 is the de-facto social-platform convention, not an OGP spec requirement.** The Open Graph protocol lists `og:image:width` / `og:image:height` as optional structured properties (ogp.me) — supplying them is recommended for reliable previews, but they are not mandatory.
 - Use the `usePageSeo` composable (see `meta-use-page-seo` rule) to avoid duplicating this across pages
 
+**`og:type` must match the content type — blog posts are `article`, not `website`:**
+
+```vue
+<script setup lang="ts">
+  // ❌ WRONG — blog post typed as website (a shared usePageSeo default
+  // silently applies 'website' to every page, including /blog/**)
+  useSeoMeta({ ogType: 'website' });
+
+  // ✅ CORRECT — article type + article metadata for blog content
+  useSeoMeta({
+    ogType: 'article',
+    articlePublishedTime: post.publishedAt, // ISO 8601
+    articleModifiedTime: post.updatedAt,
+    articleAuthor: ['https://example.com/about'],
+  });
+</script>
+```
+
+`og:type: article` unlocks the `article:*` property namespace (published/modified time, author, section, tag) that platforms and search engines use for freshness and byline display. A site-wide SEO composable that hardcodes `website` will silently mistype every blog post — accept a `type` option and pass `'article'` from blog pages.
+
+**Length limits — social cards truncate long titles and descriptions:**
+
+| Field | Safe limit | What happens beyond it |
+| --- | --- | --- |
+| `ogTitle` | ~60 chars | Facebook/LinkedIn/Slack ellipsize mid-sentence |
+| `ogDescription` | ~155 chars | Clipped on most platforms; ~65 chars visible on some mobile cards |
+
+Keep the social title/description SHORTER than the SEO `<title>`/`<meta description>` when needed — they are separate fields precisely so you can tune them per surface. A 79-char title and 208-char description will parse as "Found" in every debugger while still rendering truncated on the actual cards.
+
 **Head meta that should be set globally in `nuxt.config.ts`:**
 
 ```typescript
