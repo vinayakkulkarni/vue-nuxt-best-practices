@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.7.0...v1.8.0) (2026-07-22)
+
+
+### Features
+
+* **nuxt-seo:** add og corp cross-origin rule + og:type article and length limits ([88af7b3](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/commit/88af7b3de1fbe92d8bf4abf993cf243e22eccf04))
+
 ## [1.7.0](https://github.com/vinayakkulkarni/vue-nuxt-best-practices/compare/v1.6.1...v1.7.0) (2026-07-19)
 
 
